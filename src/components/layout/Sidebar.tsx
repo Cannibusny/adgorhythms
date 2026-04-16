@@ -1,0 +1,97 @@
+import { NavLink } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Users,
+  FileText,
+  Megaphone,
+  Phone,
+  DollarSign,
+  Settings,
+  Brain,
+  Calendar,
+  Copy,
+} from 'lucide-react';
+import { useToast } from '../../hooks/useToast';
+
+const navItems = [
+  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/pipeline', icon: Users, label: 'Client Pipeline' },
+  { to: '/proposals', icon: FileText, label: 'Proposals' },
+  { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
+  { to: '/discovery', icon: Phone, label: 'Discovery Calls' },
+  { to: '/revenue', icon: DollarSign, label: 'Revenue' },
+  { to: '/settings', icon: Settings, label: 'Settings' },
+];
+
+const CALENDLY_URL = 'https://calendly.com/mrsjw136/free-discovery-call-adgorhythms-meeting';
+
+export default function Sidebar() {
+  const { addToast } = useToast();
+
+  const copyCalendly = () => {
+    navigator.clipboard.writeText(CALENDLY_URL);
+    addToast('Calendly link copied!', 'success');
+  };
+
+  return (
+    <aside className="fixed left-0 top-0 h-full w-60 bg-[#1A1A2E] flex flex-col z-40 border-r border-white/5">
+      <div className="flex items-center gap-3 px-5 py-6 border-b border-white/5">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#6C47FF] to-[#4C2FBF] flex-shrink-0">
+          <Brain size={18} className="text-white" />
+        </div>
+        <div>
+          <div
+            className="text-base font-black tracking-tight"
+            style={{
+              background: 'linear-gradient(135deg, #6C47FF 0%, #00C896 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            ADgorhythms
+          </div>
+          <div className="text-[10px] text-gray-500 font-medium uppercase tracking-widest leading-none mt-0.5">
+            AI Marketing OS
+          </div>
+        </div>
+      </div>
+
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {navItems.map(({ to, icon: Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to === '/'}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                isActive
+                  ? 'bg-[#6C47FF] text-white shadow-lg shadow-[#6C47FF]/30'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`
+            }
+          >
+            <Icon size={18} />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="px-3 py-4 border-t border-white/5 space-y-3">
+        <button
+          onClick={copyCalendly}
+          className="w-full flex items-center gap-2 px-3 py-2.5 bg-[#00C896]/10 hover:bg-[#00C896]/20 text-[#00C896] rounded-xl text-xs font-semibold transition-all duration-150 group"
+        >
+          <Calendar size={14} />
+          <span className="flex-1 text-left truncate">Book Discovery Call</span>
+          <Copy size={12} className="opacity-60 group-hover:opacity-100" />
+        </button>
+
+        <div className="px-3 py-2">
+          <div className="text-xs font-semibold text-white leading-none">Sheridan Williams</div>
+          <div className="text-[10px] text-gray-500 mt-0.5">Agency Owner</div>
+        </div>
+      </div>
+    </aside>
+  );
+}
