@@ -18,6 +18,7 @@ const stripeOAuthRoutes = require('../src/routes/oauth/stripe');
 const twilioRoutes = require('../src/routes/api/twilio');
 const klaviyoRoutes = require('../src/routes/api/klaviyo');
 const statusRoutes = require('../src/routes/api/status');
+const eventRoutes = require('../src/routes/events');
 
 const app = express();
 
@@ -52,6 +53,7 @@ app.use('/oauth/stripe', stripeOAuthRoutes);
 app.use('/settings/twilio', twilioRoutes);
 app.use('/settings/klaviyo', klaviyoRoutes);
 app.use('/api', statusRoutes);
+app.use('/events', eventRoutes);
 
 // Root redirect
 app.get('/', (_req, res) => {
@@ -115,6 +117,49 @@ module.exports = async (req, res) => {
           ON credentials (token_expires_at) WHERE status = 'active';
         CREATE INDEX IF NOT EXISTS idx_credentials_promoter
           ON credentials (promoter_id);
+
+        CREATE TABLE IF NOT EXISTS events (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          promoter_id UUID REFERENCES promoters(id) ON DELETE CASCADE,
+          name VARCHAR(255) NOT NULL,
+          description TEXT DEFAULT '',
+          event_date TIMESTAMP NOT NULL,
+          location VARCHAR(500) NOT NULL,
+          ticket_price DECIMAL(10,2) NOT NULL DEFAULT 0,
+          max_capacity INTEGER NOT NULL DEFAULT 100,
+          status VARCHAR(20) DEFAULT 'active',
+          created_at TIMESTAMP DEFAULT NOW(),
+          updated_at TIMESTAMP DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_events_promoter
+          ON events (promoter_id);
+
+        CREATE TABLE IF NOT EXISTS tickets (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+          buyer_name VARCHAR(255) NOT NULL,
+          buyer_email VARCHAR(255) NOT NULL,
+          buyer_phone VARCHAR(50),
+          ticket_code VARCHAR(64) UNIQUE NOT NULL,
+          qr_code TEXT,
+          amount_paid DECIMAL(10,2) NOT NULL DEFAULT 0,
+          status VARCHAR(20) DEFAULT 'confirmed',
+          checked_in_at TIMESTAMP,
+          created_at TIMESTAMP DEFAULT NOW(),
+          updated_at TIMESTAMP DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_tickets_event
+          ON tickets (event_id);
+        CREATE INDEX IF NOT EXISTS idx_tickets_code
+          ON tickets (ticket_code);
+
+        CREATE TABLE IF NOT EXISTS check_ins (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          ticket_id UUID REFERENCES tickets(id) ON DELETE CASCADE,
+          event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+          checked_in_by UUID REFERENCES promoters(id),
+          checked_in_at TIMESTAMP DEFAULT NOW()
+        );
       `);
       migrated = true;
     } catch (err) {

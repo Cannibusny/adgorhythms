@@ -1,0 +1,42 @@
+<% var title = 'My Events — ADgorhythms Event Suite'; %>
+<%- include('layout', { body: `
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+      <h1>My Events</h1>
+      <h2>Manage your events and track ticket sales</h2>
+    </div>
+    <a href="/events/new" class="btn btn-primary">+ Create Event</a>
+  </div>
+
+  ${events.length === 0
+    ? '<div class="card" style="padding: 3rem; text-align: center;">' +
+        '<div style="font-size: 2rem; margin-bottom: 0.5rem;">🎪</div>' +
+        '<h3 style="margin-bottom: 0.5rem;">No events yet</h3>' +
+        '<p style="color: var(--text-muted); margin-bottom: 1rem;">Create your first event to start selling tickets.</p>' +
+        '<a href="/events/new" class="btn btn-primary">Create Event</a>' +
+      '</div>'
+    : events.map(e => {
+        const isPast = new Date(e.event_date) < new Date();
+        return '<div class="card" style="padding: 1.5rem;">' +
+          '<div class="card-header">' +
+            '<h3>' + e.name + '</h3>' +
+            '<span class="badge ' + (isPast ? 'badge-inactive' : 'badge-active') + '">' + (isPast ? 'Past' : 'Upcoming') + '</span>' +
+          '</div>' +
+          '<div class="card-meta">' +
+            new Date(e.event_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) +
+            ' at ' + new Date(e.event_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) +
+            ' — ' + e.location +
+          '</div>' +
+          '<div style="display: flex; gap: 1.5rem; margin-bottom: 1rem;">' +
+            '<div><span style="font-weight: 700; color: var(--accent);">' + e.tickets_sold + '</span> <span style="color: var(--text-muted); font-size: 0.85rem;">/ ' + e.max_capacity + ' sold</span></div>' +
+            '<div><span style="font-weight: 700; color: var(--success);">$' + parseFloat(e.revenue).toFixed(2) + '</span> <span style="color: var(--text-muted); font-size: 0.85rem;">revenue</span></div>' +
+          '</div>' +
+          '<div class="actions">' +
+            '<a href="/events/' + e.id + '/admin" class="btn btn-primary btn-sm">Manage</a>' +
+            '<a href="/events/' + e.id + '" class="btn btn-sm" style="background: transparent; border: 1px solid var(--border); color: var(--text-muted);">View Public Page</a>' +
+            '<a href="/events/' + e.id + '/checkin" class="btn btn-sm" style="background: transparent; border: 1px solid var(--warning); color: var(--warning);">Check-In</a>' +
+          '</div>' +
+        '</div>';
+      }).join('')
+  }
+` }) %>

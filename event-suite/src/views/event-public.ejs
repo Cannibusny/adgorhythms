@@ -1,0 +1,83 @@
+<% var title = event.name + ' — ADgorhythms Event Suite'; %>
+<%- include('layout', { body: `
+  ${typeof flash !== 'undefined' && flash && flash.error ? '<div class="flash flash-error">' + flash.error + '</div>' : ''}
+  ${typeof flash !== 'undefined' && flash && flash.success ? '<div class="flash flash-success">' + flash.success + '</div>' : ''}
+
+  <div style="margin-bottom: 2rem;">
+    <h1>${event.name}</h1>
+    <h2>Hosted by ${event.business_name || event.promoter_name || 'ADgorhythms'}</h2>
+  </div>
+
+  <div class="card" style="padding: 2rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+      <div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">Date & Time</div>
+        <div style="font-size: 1.1rem; font-weight: 600;">
+          ${new Date(event.event_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+          at ${new Date(event.event_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">Location</div>
+        <div style="font-size: 1.1rem; font-weight: 600;">${event.location}</div>
+      </div>
+    </div>
+
+    ${event.description ? '<div style="margin-bottom: 1.5rem; color: var(--text-muted); line-height: 1.6;">' + event.description + '</div>' : ''}
+
+    <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem;">
+      <div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--accent);">$${parseFloat(event.ticket_price).toFixed(2)}</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">per ticket</div>
+      </div>
+      <div>
+        <div style="font-size: 2rem; font-weight: 700; color: ${ticketsRemaining > 0 ? 'var(--success)' : 'var(--error)'};">${ticketsRemaining}</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">tickets remaining</div>
+      </div>
+    </div>
+  </div>
+
+  ${ticketsRemaining > 0 ? '
+  <div class="card" style="padding: 2rem; margin-top: 1rem;">
+    <h3 style="margin-bottom: 1rem;">Buy Tickets</h3>
+    <form method="POST" action="/events/' + event.id + '/checkout">
+      <label for="buyerName">Your Name *</label>
+      <input type="text" name="buyerName" id="buyerName" placeholder="Your full name" required />
+
+      <label for="buyerEmail">Email *</label>
+      <input type="email" name="buyerEmail" id="buyerEmail" placeholder="you@example.com" required />
+
+      <label for="buyerPhone">Phone (for SMS confirmation)</label>
+      <input type="tel" name="buyerPhone" id="buyerPhone" placeholder="+15551234567" />
+
+      <label for="quantity">Quantity</label>
+      <select name="quantity" id="quantity" style="width: 100%; padding: 0.65rem 1rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.95rem; margin-bottom: 1rem;">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%;">
+        Buy Tickets — $' + parseFloat(event.ticket_price).toFixed(2) + ' each
+      </button>
+    </form>
+  </div>
+  ' : '<div class="card" style="padding: 2rem; text-align: center;"><h3 style="color: var(--error);">Sold Out</h3></div>'}
+
+  <div style="text-align: center; margin-top: 1.5rem;">
+    <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.name)}&dates=${new Date(event.event_date).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'}/${new Date(new Date(event.event_date).getTime() + 3600000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'}&location=${encodeURIComponent(event.location)}&details=${encodeURIComponent(event.description || '')}" target="_blank" class="btn btn-primary" style="background: transparent; border: 1px solid var(--accent); color: var(--accent);">
+      Add to Calendar
+    </a>
+  </div>
+
+  <div style="text-align: center; margin-top: 1.5rem;">
+    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Share this event</div>
+    <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+      <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent((typeof process !== 'undefined' && process.env && process.env.BASE_URL ? process.env.BASE_URL : '') + '/events/' + event.id)}" target="_blank" class="btn btn-sm" style="background: #1877F2; color: #fff;">Facebook</a>
+      <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(event.name + ' — Get your tickets now!')}&url=${encodeURIComponent((typeof process !== 'undefined' && process.env && process.env.BASE_URL ? process.env.BASE_URL : '') + '/events/' + event.id)}" target="_blank" class="btn btn-sm" style="background: #1DA1F2; color: #fff;">Twitter</a>
+      <a href="https://www.instagram.com/" target="_blank" class="btn btn-sm" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff;">Instagram</a>
+    </div>
+  </div>
+` }) %>
