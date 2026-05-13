@@ -8,9 +8,18 @@ const router = express.Router();
 router.get('/health', async (_req, res) => {
   try {
     await db.query('SELECT 1');
-    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      db_configured: !!process.env.DATABASE_URL,
+    });
   } catch (err) {
-    res.status(503).json({ status: 'unhealthy', error: err.message });
+    res.status(503).json({
+      status: 'unhealthy',
+      error: err.message,
+      db_configured: !!process.env.DATABASE_URL,
+      node_env: process.env.NODE_ENV || 'not set',
+    });
   }
 });
 
