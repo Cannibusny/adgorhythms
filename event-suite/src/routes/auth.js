@@ -33,7 +33,9 @@ router.post('/login', async (req, res) => {
     }
 
     req.session.promoterId = result.rows[0].id;
-    res.redirect('/dashboard');
+    req.session.save(() => {
+      res.redirect(303, '/dashboard');
+    });
   } catch (err) {
     console.error('Login error:', err);
     res.render('login', { error: 'Something went wrong' });
@@ -61,7 +63,9 @@ router.post('/register', async (req, res) => {
     );
 
     req.session.promoterId = result.rows[0].id;
-    res.redirect('/dashboard');
+    req.session.save(() => {
+      res.redirect(303, '/dashboard');
+    });
   } catch (err) {
     console.error('Registration error:', err);
     res.render('register', { error: 'Something went wrong' });
@@ -70,7 +74,7 @@ router.post('/register', async (req, res) => {
 
 router.get('/logout', (req, res) => {
   req.session.destroy(() => {
-    res.redirect('/login');
+    res.redirect(303, '/login');
   });
 });
 

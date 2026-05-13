@@ -56,8 +56,23 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    sameSite: 'lax',
   },
 }));
+
+// Ensure POST redirects use 303 (GET) to prevent 307 method-preserving redirects
+app.use((req, res, next) => {
+  if (req.method === 'POST') {
+    const originalRedirect = res.redirect.bind(res);
+    res.redirect = function redirect(statusOrUrl, url) {
+      if (typeof statusOrUrl === 'string') {
+        return originalRedirect(303, statusOrUrl);
+      }
+      return originalRedirect(statusOrUrl, url);
+    };
+  }
+  next();
+});
 
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
