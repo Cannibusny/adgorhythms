@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const helmet = require('helmet');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -35,6 +36,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(session({
+  store: new pgSession({
+    pool: db.pool,
+    tableName: 'user_sessions',
+    createTableIfMissing: true,
+  }),
   secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
   resave: false,
   saveUninitialized: false,
