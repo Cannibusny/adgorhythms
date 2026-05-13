@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <link rel="manifest" href="/manifest.json" />
   <title><%= typeof title !== 'undefined' ? title : 'ADgorhythms Event Suite' %></title>
   <style>
     :root {
@@ -17,6 +21,8 @@
       --success: #00b894;
       --error: #e74c3c;
       --warning: #f39c12;
+      --gold: #FFD700;
+      --premium: #9b59b6;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -48,7 +54,7 @@
       transition: color 0.2s;
     }
     nav .nav-links a:hover { color: var(--text); }
-    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem; }
     h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
     h2 { font-size: 1.25rem; margin-bottom: 1rem; color: var(--text-muted); font-weight: 400; }
     .card {
@@ -60,29 +66,6 @@
       transition: border-color 0.2s;
     }
     .card:hover { border-color: var(--accent); }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.75rem;
-    }
-    .card-header h3 { font-size: 1.1rem; }
-    .badge {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    .badge-active { background: rgba(0,184,148,0.15); color: var(--success); }
-    .badge-error { background: rgba(231,76,60,0.15); color: var(--error); }
-    .badge-inactive { background: rgba(136,136,160,0.15); color: var(--text-muted); }
-    .badge-expired { background: rgba(243,156,18,0.15); color: var(--warning); }
-    .card-meta {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 0.75rem;
-    }
     .btn {
       display: inline-block;
       padding: 0.5rem 1.25rem;
@@ -97,9 +80,8 @@
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-primary:hover { background: var(--accent-hover); }
     .btn-danger { background: transparent; color: var(--error); border: 1px solid var(--error); }
-    .btn-danger:hover { background: rgba(231,76,60,0.1); }
     .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       padding: 0.65rem 1rem;
       background: var(--surface-2);
@@ -110,24 +92,23 @@
       margin-bottom: 1rem;
       outline: none;
     }
-    input:focus { border-color: var(--accent); }
-    label {
-      display: block;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 0.35rem;
-      font-weight: 500;
-    }
-    .error-msg { color: var(--error); font-size: 0.9rem; margin-bottom: 1rem; }
-    .flash {
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      margin-bottom: 1.5rem;
-      font-size: 0.9rem;
-    }
+    input:focus, select:focus { border-color: var(--accent); }
+    label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.35rem; font-weight: 500; }
+    .flash { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; }
     .flash-success { background: rgba(0,184,148,0.1); border: 1px solid var(--success); color: var(--success); }
     .flash-error { background: rgba(231,76,60,0.1); border: 1px solid var(--error); color: var(--error); }
-    .actions { display: flex; gap: 0.75rem; align-items: center; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; text-align: center; }
+    .stat-number { font-size: 2rem; font-weight: 700; line-height: 1.2; }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+    @media (max-width: 600px) {
+      nav { padding: 0.75rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
+      nav .nav-links a { margin-left: 0.75rem; font-size: 0.8rem; }
+      .container { padding: 1rem; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      h1 { font-size: 1.4rem; }
+      .btn { padding: 0.6rem 1rem; font-size: 0.85rem; }
+    }
   </style>
 </head>
 <body>
@@ -136,8 +117,7 @@
     <div class="nav-links">
       <% if (typeof promoter !== 'undefined' && promoter) { %>
         <a href="/dashboard">Dashboard</a>
-        <a href="/checkin">Check-In</a>
-        <a href="/events">Events</a>
+        <a href="/checkin">Events</a>
         <a href="/logout">Logout</a>
       <% } else { %>
         <a href="/login">Login</a>
@@ -146,7 +126,3 @@
     </div>
   </nav>
   <div class="container">
-    <%- body %>
-  </div>
-</body>
-</html>

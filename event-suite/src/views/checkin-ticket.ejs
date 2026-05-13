@@ -1,0 +1,41 @@
+<%- include('layout-start', { title: 'Your Ticket — ' + attendee.event_name, promoter: promoter }) %>
+
+<div style="text-align: center; max-width: 500px; margin: 0 auto;">
+  <div class="card" style="padding: 2rem;">
+    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎟️</div>
+    <h1 style="font-size: 1.5rem;"><%= attendee.event_name %></h1>
+    <div style="color: var(--text-muted); margin-bottom: 1.5rem;">
+      <%= new Date(attendee.event_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) %>
+      &bull; <%= attendee.location %>
+    </div>
+
+    <% if (attendee.qr_code) { %>
+    <div style="background: #fff; padding: 1rem; border-radius: 12px; display: inline-block; margin-bottom: 1.5rem;">
+      <img src="<%= attendee.qr_code %>" alt="QR Code" style="width: 220px; height: 220px;" />
+    </div>
+    <% } %>
+
+    <div style="margin-bottom: 1rem;">
+      <div style="font-size: 1.2rem; font-weight: 700;"><%= attendee.name %></div>
+      <div style="color: var(--text-muted); margin-top: 0.25rem;">
+        <span style="color: <%= attendee.table_type === 'Gold' ? 'var(--gold)' : attendee.table_type === 'Premium' ? 'var(--premium)' : 'var(--text-muted)' %>; font-weight: 600;"><%= attendee.table_type %></span> Table for <%= attendee.table_size %>
+      </div>
+    </div>
+
+    <div style="background: var(--surface-2); padding: 0.75rem; border-radius: 8px; font-family: monospace; font-size: 0.9rem; color: var(--accent); word-break: break-all;">
+      <%= attendee.ticket_code %>
+    </div>
+
+    <% if (attendee.checked_in) { %>
+    <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(0,184,148,0.1); border-radius: 8px; color: var(--success);">
+      Checked In at <%= new Date(attendee.checked_in_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %>
+    </div>
+    <% } %>
+  </div>
+
+  <div style="margin-top: 1.5rem;">
+    <p style="font-size: 0.85rem; color: var(--text-muted);">Show this QR code at the door for fast check-in.</p>
+  </div>
+</div>
+
+<%- include('layout-end') %>

@@ -1,0 +1,198 @@
+<%- include('layout-start', { title: event.name + ' — Admin', promoter: promoter }) %>
+
+<% if (typeof flash !== 'undefined' && flash) { %>
+  <% if (flash.success) { %><div class="flash flash-success"><%= flash.success %></div><% } %>
+  <% if (flash.error) { %><div class="flash flash-error"><%= flash.error %></div><% } %>
+<% } %>
+
+<div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+  <div>
+    <h1><%= event.name %></h1>
+    <h2>Admin Dashboard</h2>
+  </div>
+  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+    <a href="/checkin/<%= event.id %>/scan" class="btn btn-primary">Open Check-In</a>
+    <a href="/checkin/<%= event.id %>/live" class="btn" style="background: var(--success); color: #fff;">Live View</a>
+    <a href="/checkin/<%= event.id %>/export" class="btn btn-sm" style="background: var(--surface-2); color: var(--text);">Export CSV</a>
+  </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-number" style="color: var(--accent);"><%= stats.total %></div>
+    <div class="stat-label">Total Registered</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" style="color: var(--success);"><%= stats.checkedIn %></div>
+    <div class="stat-label">Checked In</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" style="color: var(--gold);"><%= stats.goldTables %></div>
+    <div class="stat-label">Gold Tables</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" style="color: var(--premium);"><%= stats.premiumTables %></div>
+    <div class="stat-label">Premium Tables</div>
+  </div>
+  <div class="stat-card" style="grid-column: span 2;">
+    <div class="stat-number" style="color: var(--success);">$<%= stats.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></div>
+    <div class="stat-label">Total Revenue (Gold: $<%= stats.goldRevenue.toFixed(2) %> &bull; Premium: $<%= stats.premiumRevenue.toFixed(2) %>)</div>
+  </div>
+</div>
+
+<!-- Event Info -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+  <div class="card" style="padding: 1rem;">
+    <div style="font-size: 0.75rem; color: var(--text-muted);">Date &amp; Time</div>
+    <div style="font-weight: 600;"><%= new Date(event.event_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) %> at <%= new Date(event.event_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %></div>
+  </div>
+  <div class="card" style="padding: 1rem;">
+    <div style="font-size: 0.75rem; color: var(--text-muted);">Location</div>
+    <div style="font-weight: 600;"><%= event.location %></div>
+  </div>
+</div>
+
+<!-- Import CSV -->
+<div class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+  <h3 style="margin-bottom: 0.75rem;">Import from Eventbrite / CSV</h3>
+  <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+    Upload a CSV with columns: Name (or First Name + Last Name), Email, Phone, Table Type, Table Size, Amount Paid
+  </p>
+  <form method="POST" action="/checkin/<%= event.id %>/admin/import" enctype="multipart/form-data" style="display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 200px;">
+      <input type="file" name="csvFile" accept=".csv" required style="margin-bottom: 0;" />
+    </div>
+    <button type="submit" class="btn btn-primary">Import CSV</button>
+  </form>
+</div>
+
+<!-- Manual Entry -->
+<div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+  <h3 style="margin-bottom: 0.75rem;">Add Attendee (Physical Sale)</h3>
+  <form method="POST" action="/checkin/<%= event.id %>/admin/add">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem;">
+      <div>
+        <label for="name">Name *</label>
+        <input type="text" name="name" id="name" placeholder="John Smith" required />
+      </div>
+      <div>
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" placeholder="john@example.com" />
+      </div>
+      <div>
+        <label for="phone">Phone</label>
+        <input type="tel" name="phone" id="phone" placeholder="+15551234567" />
+      </div>
+      <div>
+        <label for="tableType">Table Type</label>
+        <select name="tableType" id="tableType">
+          <option value="Gold">Gold</option>
+          <option value="Premium">Premium</option>
+          <option value="General">General</option>
+          <option value="VIP">VIP</option>
+        </select>
+      </div>
+      <div>
+        <label for="tableSize">Table Size</label>
+        <input type="number" name="tableSize" id="tableSize" value="1" min="1" max="20" />
+      </div>
+      <div>
+        <label for="amountPaid">Amount Paid ($)</label>
+        <input type="number" name="amountPaid" id="amountPaid" value="0" min="0" step="0.01" />
+      </div>
+      <div style="grid-column: span 2;">
+        <label for="saleLocation">Sale Location</label>
+        <select name="saleLocation" id="saleLocation">
+          <option value="">Select location...</option>
+          <option value="Location 1">Location 1</option>
+          <option value="Location 2">Location 2</option>
+          <option value="Location 3">Location 3</option>
+          <option value="Location 4">Location 4</option>
+          <option value="Location 5">Location 5</option>
+          <option value="Location 6">Location 6</option>
+          <option value="Online">Online</option>
+          <option value="At Door">At Door</option>
+        </select>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary" style="width: 100%;">Add Attendee</button>
+  </form>
+</div>
+
+<!-- Post-Event Follow-Up -->
+<div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+  <h3 style="margin-bottom: 0.5rem;">Post-Event Follow-Up</h3>
+  <% if (event.followup_sent_at) { %>
+    <p style="color: var(--success); font-size: 0.9rem;">Follow-up sent on <%= new Date(event.followup_sent_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) %></p>
+  <% } else { %>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem;">Send a "thank you" SMS to all checked-in attendees (requires Twilio connected)</p>
+    <form method="POST" action="/checkin/<%= event.id %>/admin/send-followup" onsubmit="return confirm('Send follow-up to all checked-in attendees?');">
+      <button type="submit" class="btn" style="background: var(--warning); color: #000;">Send Follow-Up Messages</button>
+    </form>
+  <% } %>
+</div>
+
+<!-- Attendee List -->
+<div class="card" style="padding: 1.5rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+    <h3>Attendee List (<%= attendees.length %>)</h3>
+    <input type="text" id="attendeeSearch" placeholder="Search attendees..." style="width: 250px; margin-bottom: 0;" />
+  </div>
+
+  <% if (attendees.length === 0) { %>
+    <p style="text-align: center; color: var(--text-muted); padding: 2rem;">No attendees yet. Import a CSV or add manually above.</p>
+  <% } else { %>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--border); text-align: left;">
+            <th style="padding: 0.5rem;">Name</th>
+            <th style="padding: 0.5rem;">Email</th>
+            <th style="padding: 0.5rem;">Table</th>
+            <th style="padding: 0.5rem;">Size</th>
+            <th style="padding: 0.5rem;">Paid</th>
+            <th style="padding: 0.5rem;">Source</th>
+            <th style="padding: 0.5rem;">Status</th>
+          </tr>
+        </thead>
+        <tbody id="attendeeTableBody">
+          <% attendees.forEach(function(a) { %>
+          <tr class="attendee-row" style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 0.5rem; font-weight: 600;"><%= a.name %></td>
+            <td style="padding: 0.5rem; color: var(--text-muted);"><%= a.email %></td>
+            <td style="padding: 0.5rem;">
+              <span style="color: <%= a.table_type === 'Gold' ? 'var(--gold)' : a.table_type === 'Premium' ? 'var(--premium)' : 'var(--text-muted)' %>; font-weight: 600;"><%= a.table_type %></span>
+            </td>
+            <td style="padding: 0.5rem;"><%= a.table_size %></td>
+            <td style="padding: 0.5rem;">$<%= parseFloat(a.amount_paid || 0).toFixed(2) %></td>
+            <td style="padding: 0.5rem; color: var(--text-muted); font-size: 0.8rem;"><%= a.source %></td>
+            <td style="padding: 0.5rem;">
+              <% if (a.checked_in) { %>
+                <span style="color: var(--success); font-weight: 600;">Checked In</span>
+              <% } else { %>
+                <span style="color: var(--text-muted);">Not Yet</span>
+              <% } %>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<div style="text-align: center; margin-top: 1.5rem;">
+  <a href="/checkin" style="color: var(--text-muted); text-decoration: none;">&larr; Back to My Events</a>
+</div>
+
+<script>
+document.getElementById('attendeeSearch').addEventListener('input', function() {
+  var q = this.value.toLowerCase();
+  document.querySelectorAll('.attendee-row').forEach(function(row) {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
+</script>
+
+<%- include('layout-end') %>

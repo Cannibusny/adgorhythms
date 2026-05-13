@@ -1,0 +1,5 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'>
+    <rect width='512' height='512' fill='#0a0a0f' rx='76'/>
+    <circle cx='256' cy='256' r='179' fill='#6c5ce7'/>
+    <text x='256' y='296' fill='white' font-size='153' font-family='sans-serif' font-weight='bold' text-anchor='middle'>AD</text>
+  </svg>

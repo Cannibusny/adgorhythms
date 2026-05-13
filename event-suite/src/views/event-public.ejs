@@ -37,34 +37,26 @@
     </div>
   </div>
 
-  ${ticketsRemaining > 0 ? '
-  <div class="card" style="padding: 2rem; margin-top: 1rem;">
-    <h3 style="margin-bottom: 1rem;">Buy Tickets</h3>
-    <form method="POST" action="/events/' + event.id + '/checkout">
-      <label for="buyerName">Your Name *</label>
-      <input type="text" name="buyerName" id="buyerName" placeholder="Your full name" required />
-
-      <label for="buyerEmail">Email *</label>
-      <input type="email" name="buyerEmail" id="buyerEmail" placeholder="you@example.com" required />
-
-      <label for="buyerPhone">Phone (for SMS confirmation)</label>
-      <input type="tel" name="buyerPhone" id="buyerPhone" placeholder="+15551234567" />
-
-      <label for="quantity">Quantity</label>
-      <select name="quantity" id="quantity" style="width: 100%; padding: 0.65rem 1rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.95rem; margin-bottom: 1rem;">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-      </select>
-
-      <button type="submit" class="btn btn-primary" style="width: 100%;">
-        Buy Tickets — $' + parseFloat(event.ticket_price).toFixed(2) + ' each
-      </button>
-    </form>
-  </div>
-  ' : '<div class="card" style="padding: 2rem; text-align: center;"><h3 style="color: var(--error);">Sold Out</h3></div>'}
+  ${ticketsRemaining > 0 ?
+    '<div class="card" style="padding: 2rem; margin-top: 1rem;">' +
+    '<h3 style="margin-bottom: 1rem;">Buy Tickets</h3>' +
+    '<form method="POST" action="/events/' + event.id + '/checkout">' +
+      '<label for="buyerName">Your Name *</label>' +
+      '<input type="text" name="buyerName" id="buyerName" placeholder="Your full name" required />' +
+      '<label for="buyerEmail">Email *</label>' +
+      '<input type="email" name="buyerEmail" id="buyerEmail" placeholder="you@example.com" required />' +
+      '<label for="buyerPhone">Phone (for SMS confirmation)</label>' +
+      '<input type="tel" name="buyerPhone" id="buyerPhone" placeholder="+15551234567" />' +
+      '<label for="quantity">Quantity</label>' +
+      '<select name="quantity" id="quantity" style="width: 100%; padding: 0.65rem 1rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.95rem; margin-bottom: 1rem;">' +
+        '<option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>' +
+      '</select>' +
+      '<button type="submit" class="btn btn-primary" style="width: 100%;">' +
+        'Buy Tickets — $' + parseFloat(event.ticket_price).toFixed(2) + ' each' +
+      '</button>' +
+    '</form>' +
+    '</div>'
+  : '<div class="card" style="padding: 2rem; text-align: center;"><h3 style="color: var(--error);">Sold Out</h3></div>'}
 
   <div style="text-align: center; margin-top: 1.5rem;">
     <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.name)}&dates=${new Date(event.event_date).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'}/${new Date(new Date(event.event_date).getTime() + 3600000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'}&location=${encodeURIComponent(event.location)}&details=${encodeURIComponent(event.description || '')}" target="_blank" class="btn btn-primary" style="background: transparent; border: 1px solid var(--accent); color: var(--accent);">
