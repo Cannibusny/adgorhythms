@@ -24,6 +24,9 @@ const checkinRoutes = require('../src/routes/checkin');
 
 const app = express();
 
+// Trust Vercel's proxy so secure cookies work behind HTTPS
+app.set('trust proxy', 1);
+
 // View engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '..', 'src', 'views'));
