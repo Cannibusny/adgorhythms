@@ -1,0 +1,32 @@
+<% var title = 'Klaviyo Settings — ADgorhythms Event Suite'; var promoter = { name: 'User' }; %>
+<%- include('layout', { body: `
+  <div style="max-width: 500px; margin: 2rem auto;">
+    <h1>Klaviyo Settings</h1>
+    <h2>Add your Klaviyo API key for email marketing</h2>
+
+    ${error ? '<p class="error-msg">' + error + '</p>' : ''}
+    ${success ? '<div class="flash flash-success">' + success + '</div>' : ''}
+
+    <div class="card">
+      <form method="POST" action="/settings/klaviyo/save">
+        <label for="apiKey">Private API Key</label>
+        <input type="password" id="apiKey" name="apiKey" required
+               placeholder="pk_xxxxxxxxxxxxxxxxxxxxxxxx" />
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Find your API key at:
+          <a href="https://www.klaviyo.com/settings/account/api-keys" target="_blank"
+             style="color: var(--accent);">Klaviyo Settings &rarr; API Keys</a>
+        </p>
+
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top: 0.5rem;">
+          Save Klaviyo API Key
+        </button>
+      </form>
+    </div>
+
+    <p style="text-align:center; margin-top:1.5rem;">
+      <a href="/dashboard" style="color: var(--accent); text-decoration: none;">Back to Dashboard</a>
+    </p>
+  </div>
+` }) %>

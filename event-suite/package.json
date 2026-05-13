@@ -1,0 +1,46 @@
+{
+  "name": "adgorhythms-event-suite",
+  "version": "1.0.0",
+  "description": "ADgorhythms Event Suite - Autonomous Authentication & Credential Management System",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "lint": "eslint src/",
+    "db:migrate": "node src/db/migrate.js"
+  },
+  "keywords": [
+    "oauth",
+    "credential-management",
+    "multi-tenant",
+    "event-suite"
+  ],
+  "author": "ADgorhythms",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.16.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "ejs": "^5.0.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "googleapis": "^171.4.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1",
+    "node-cron": "^4.2.1",
+    "passport": "^0.7.0",
+    "passport-facebook": "^3.0.0",
+    "passport-google-oauth20": "^2.0.0",
+    "pg": "^8.20.0",
+    "stripe": "^22.1.1",
+    "twilio": "^6.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.4",
+    "nodemon": "^3.1.14"
+  }
+}
