@@ -1,0 +1,61 @@
+<%- include('layout-start', { title: 'Create Event', promoter: promoter }) %>
+
+<h1>Create Event</h1>
+<h2>Set up a new event for check-in management</h2>
+
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="flash flash-error"><%= error %></div>
+<% } %>
+
+<div class="card" style="padding: 2rem;">
+  <form method="POST" action="/checkin/new">
+    <label for="name">Event Name *</label>
+    <input type="text" name="name" id="name" placeholder="Father's Day Cookout 2026" required value="<%= typeof form !== 'undefined' && form ? form.name || '' : '' %>" />
+
+    <label for="description">Description</label>
+    <textarea name="description" id="description" rows="3" placeholder="Tell attendees what to expect..."><%= typeof form !== 'undefined' && form ? form.description || '' : '' %></textarea>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div>
+        <label for="date">Date *</label>
+        <input type="date" name="date" id="date" required value="<%= typeof form !== 'undefined' && form ? form.date || '' : '' %>" />
+      </div>
+      <div>
+        <label for="time">Time *</label>
+        <input type="time" name="time" id="time" required value="<%= typeof form !== 'undefined' && form ? form.time || '' : '' %>" />
+      </div>
+    </div>
+
+    <label for="location">Venue / Location *</label>
+    <input type="text" name="location" id="location" placeholder="Co-op City Community Center, Bronx" required value="<%= typeof form !== 'undefined' && form ? form.location || '' : '' %>" />
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+      <div>
+        <label for="city">City</label>
+        <input type="text" name="city" id="city" placeholder="Bronx, NY" value="<%= typeof form !== 'undefined' && form ? form.city || '' : '' %>" />
+      </div>
+      <div>
+        <label for="region">Region</label>
+        <input type="text" name="region" id="region" placeholder="NYC" value="<%= typeof form !== 'undefined' && form ? form.region || 'NYC' : 'NYC' %>" />
+      </div>
+      <div>
+        <label for="currency">Currency</label>
+        <select name="currency" id="currency">
+          <option value="USD" selected>USD ($)</option>
+          <option value="EUR">EUR (&#x20AC;)</option>
+          <option value="GBP">GBP (&#xA3;)</option>
+          <option value="JMD">JMD (J$)</option>
+          <option value="TTD">TTD (TT$)</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">Create Event</button>
+  </form>
+</div>
+
+<div style="text-align: center; margin-top: 1rem;">
+  <a href="/checkin" style="color: var(--text-muted); text-decoration: none;">&larr; Back to My Events</a>
+</div>
+
+<%- include('layout-end') %>

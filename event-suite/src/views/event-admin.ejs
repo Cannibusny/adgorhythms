@@ -1,0 +1,100 @@
+<% var title = 'Admin — ' + event.name; %>
+<%- include('layout', { body: `
+  ${typeof flash !== 'undefined' && flash && flash.refund === 'success' ? '<div class="flash flash-success">Ticket refunded/cancelled successfully.</div>' : ''}
+
+  <div style="margin-bottom: 1.5rem;">
+    <h1>${event.name}</h1>
+    <h2>Event Admin Dashboard</h2>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div class="card" style="text-align: center; padding: 1.5rem;">
+      <div style="font-size: 2rem; font-weight: 700; color: var(--accent);">${totalSold}</div>
+      <div style="font-size: 0.85rem; color: var(--text-muted);">Tickets Sold</div>
+    </div>
+    <div class="card" style="text-align: center; padding: 1.5rem;">
+      <div style="font-size: 2rem; font-weight: 700; color: var(--success);">$${totalRevenue.toFixed(2)}</div>
+      <div style="font-size: 0.85rem; color: var(--text-muted);">Total Revenue</div>
+    </div>
+    <div class="card" style="text-align: center; padding: 1.5rem;">
+      <div style="font-size: 2rem; font-weight: 700; color: var(--warning);">${checkedIn}</div>
+      <div style="font-size: 0.85rem; color: var(--text-muted);">Checked In</div>
+    </div>
+    <div class="card" style="text-align: center; padding: 1.5rem;">
+      <div style="font-size: 2rem; font-weight: 700;">${event.max_capacity}</div>
+      <div style="font-size: 0.85rem; color: var(--text-muted);">Max Capacity</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+    <div class="card" style="padding: 1rem;">
+      <div style="font-size: 0.8rem; color: var(--text-muted);">Date & Time</div>
+      <div style="font-weight: 600;">${new Date(event.event_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} at ${new Date(event.event_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</div>
+    </div>
+    <div class="card" style="padding: 1rem;">
+      <div style="font-size: 0.8rem; color: var(--text-muted);">Location</div>
+      <div style="font-weight: 600;">${event.location}</div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+    <a href="/events/${event.id}" class="btn btn-primary btn-sm" style="background: transparent; border: 1px solid var(--accent); color: var(--accent);">View Public Page</a>
+    <a href="/events/${event.id}/checkin" class="btn btn-primary btn-sm">Open Check-In</a>
+    <a href="/events/${event.id}/admin/export" class="btn btn-primary btn-sm" style="background: transparent; border: 1px solid var(--success); color: var(--success);">Export CSV</a>
+  </div>
+
+  <div class="card" style="padding: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h3>Attendee List</h3>
+      <input type="text" id="search-input" placeholder="Search attendees..." style="max-width: 250px; margin-bottom: 0;" oninput="filterAttendees()" />
+    </div>
+
+    ${tickets.length === 0
+      ? '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No tickets sold yet.</div>'
+      : '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;" id="attendee-table">' +
+        '<thead><tr style="border-bottom: 1px solid var(--border);">' +
+          '<th style="text-align: left; padding: 0.75rem 0.5rem; color: var(--text-muted); font-weight: 500;">Name</th>' +
+          '<th style="text-align: left; padding: 0.75rem 0.5rem; color: var(--text-muted); font-weight: 500;">Email</th>' +
+          '<th style="text-align: left; padding: 0.75rem 0.5rem; color: var(--text-muted); font-weight: 500;">Status</th>' +
+          '<th style="text-align: left; padding: 0.75rem 0.5rem; color: var(--text-muted); font-weight: 500;">Paid</th>' +
+          '<th style="text-align: right; padding: 0.75rem 0.5rem; color: var(--text-muted); font-weight: 500;">Action</th>' +
+        '</tr></thead><tbody>' +
+        tickets.map(t => {
+          const statusColor = t.status === 'checked_in' ? 'var(--success)' : t.status === 'cancelled' ? 'var(--error)' : 'var(--text-muted)';
+          const statusText = t.status === 'checked_in' ? 'Checked In' : t.status === 'cancelled' ? 'Cancelled' : 'Confirmed';
+          return '<tr class="attendee-row" style="border-bottom: 1px solid var(--border);">' +
+            '<td style="padding: 0.75rem 0.5rem;">' + t.buyer_name + '</td>' +
+            '<td style="padding: 0.75rem 0.5rem; color: var(--text-muted);">' + t.buyer_email + '</td>' +
+            '<td style="padding: 0.75rem 0.5rem;"><span style="color: ' + statusColor + '; font-weight: 600;">' + statusText + '</span>' +
+              (t.checked_in_at ? '<div style="font-size: 0.75rem; color: var(--text-muted);">' + new Date(t.checked_in_at).toLocaleTimeString() + '</div>' : '') +
+            '</td>' +
+            '<td style="padding: 0.75rem 0.5rem;">$' + parseFloat(t.amount_paid).toFixed(2) + '</td>' +
+            '<td style="padding: 0.75rem 0.5rem; text-align: right;">' +
+              (t.status !== 'cancelled'
+                ? '<form method="POST" action="/events/' + event.id + '/admin/refund/' + t.id + '" style="display: inline;" onsubmit="return confirm(\\\'Refund/cancel this ticket?\\\')">' +
+                    '<button type="submit" class="btn btn-danger btn-sm">Refund</button>' +
+                  '</form>'
+                : '<span style="color: var(--text-muted);">—</span>'
+              ) +
+            '</td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody></table></div>'
+    }
+  </div>
+
+  <div style="text-align: center; margin-top: 1.5rem;">
+    <a href="/events" style="color: var(--text-muted); text-decoration: none;">← Back to My Events</a>
+  </div>
+
+  <script>
+    function filterAttendees() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const rows = document.querySelectorAll('.attendee-row');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+      });
+    }
+  </script>
+` }) %>

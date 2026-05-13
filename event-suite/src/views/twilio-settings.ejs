@@ -1,0 +1,35 @@
+<% var title = 'Twilio Settings — ADgorhythms Event Suite'; var promoter = { name: 'User' }; %>
+<%- include('layout', { body: `
+  <div style="max-width: 500px; margin: 2rem auto;">
+    <h1>Twilio Settings</h1>
+    <h2>Add your Twilio credentials for SMS</h2>
+
+    ${error ? '<p class="error-msg">' + error + '</p>' : ''}
+    ${success ? '<div class="flash flash-success">' + success + '</div>' : ''}
+
+    <div class="card">
+      <form method="POST" action="/settings/twilio/save">
+        <label for="accountSid">Account SID</label>
+        <input type="text" id="accountSid" name="accountSid" required
+               placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+               value="${credential ? credential.account_id?.split('|')[0] || '' : ''}" />
+
+        <label for="authToken">Auth Token</label>
+        <input type="password" id="authToken" name="authToken" required
+               placeholder="Your Twilio Auth Token" />
+
+        <label for="phoneNumber">Twilio Phone Number (optional)</label>
+        <input type="tel" id="phoneNumber" name="phoneNumber"
+               placeholder="+15551234567" />
+
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top: 0.5rem;">
+          Save Twilio Credentials
+        </button>
+      </form>
+    </div>
+
+    <p style="text-align:center; margin-top:1.5rem;">
+      <a href="/dashboard" style="color: var(--accent); text-decoration: none;">Back to Dashboard</a>
+    </p>
+  </div>
+` }) %>

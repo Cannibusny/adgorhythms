@@ -1,0 +1,145 @@
+<% var title = 'Check-In — ' + event.name; %>
+<%- include('layout', { body: `
+  <div style="text-align: center; margin-bottom: 1.5rem;">
+    <h1>Check-In</h1>
+    <h2>${event.name}</h2>
+  </div>
+
+  <div class="card" style="padding: 2rem; text-align: center;">
+    <div id="scanner-area" style="margin-bottom: 1rem;">
+      <video id="camera-feed" style="width: 100%; max-width: 400px; border-radius: 12px; display: none;" autoplay playsinline></video>
+      <canvas id="scan-canvas" style="display: none;"></canvas>
+    </div>
+
+    <button id="scan-btn" class="btn btn-primary" style="width: 100%; padding: 1.25rem; font-size: 1.25rem; margin-bottom: 1rem;" onclick="startScanner()">
+      📷 Scan Ticket
+    </button>
+
+    <div style="margin: 1.5rem 0; color: var(--text-muted); font-size: 0.85rem;">— or enter code manually —</div>
+
+    <form id="manual-form" onsubmit="verifyManual(event); return false;" style="display: flex; gap: 0.5rem;">
+      <input type="text" id="manual-code" placeholder="Enter ticket code" style="flex: 1; margin-bottom: 0;" />
+      <button type="submit" class="btn btn-primary">Verify</button>
+    </form>
+
+    <div id="result" style="margin-top: 1.5rem; display: none;">
+      <div id="result-icon" style="font-size: 4rem;"></div>
+      <div id="result-msg" style="font-size: 1.25rem; font-weight: 600; margin-top: 0.5rem;"></div>
+      <div id="result-detail" style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem;"></div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 1rem;">
+    <a href="/events/${event.id}/admin" style="color: var(--text-muted); text-decoration: none;">← Back to Admin Dashboard</a>
+  </div>
+
+  <script>
+    let scanning = false;
+    let stream = null;
+
+    async function startScanner() {
+      const btn = document.getElementById('scan-btn');
+      const video = document.getElementById('camera-feed');
+
+      if (scanning) {
+        stopScanner();
+        return;
+      }
+
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
+        });
+        video.srcObject = stream;
+        video.style.display = 'block';
+        btn.textContent = '⏹️ Stop Scanner';
+        scanning = true;
+        scanFrame();
+      } catch (err) {
+        alert('Camera access denied. Use manual entry instead.');
+      }
+    }
+
+    function stopScanner() {
+      const video = document.getElementById('camera-feed');
+      const btn = document.getElementById('scan-btn');
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
+      video.style.display = 'none';
+      btn.textContent = '📷 Scan Ticket';
+      scanning = false;
+    }
+
+    function scanFrame() {
+      if (!scanning) return;
+      const video = document.getElementById('camera-feed');
+      const canvas = document.getElementById('scan-canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+        // QR scanning would need a JS library like jsQR
+        // For now, we rely on manual entry or native camera scan
+      }
+      requestAnimationFrame(scanFrame);
+    }
+
+    async function verifyManual(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const code = document.getElementById('manual-code').value.trim();
+      if (!code) return;
+
+      // Try to parse as JSON (QR code data) or use as raw ticket code
+      let ticketCode = code;
+      try {
+        const parsed = JSON.parse(code);
+        if (parsed.ticketCode) ticketCode = parsed.ticketCode;
+      } catch (_) {}
+
+      const res = await fetch('/events/${event.id}/checkin/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticketCode })
+      });
+
+      const data = await res.json();
+      showResult(data);
+      document.getElementById('manual-code').value = '';
+    }
+
+    function showResult(data) {
+      const el = document.getElementById('result');
+      const icon = document.getElementById('result-icon');
+      const msg = document.getElementById('result-msg');
+      const detail = document.getElementById('result-detail');
+
+      el.style.display = 'block';
+
+      if (data.valid) {
+        icon.textContent = '✅';
+        msg.textContent = data.message;
+        msg.style.color = 'var(--success)';
+        detail.textContent = data.buyer + ' (' + data.email + ')';
+        el.style.background = 'rgba(0,184,148,0.05)';
+        el.style.borderRadius = '12px';
+        el.style.padding = '1.5rem';
+      } else {
+        icon.textContent = '❌';
+        msg.textContent = data.message;
+        msg.style.color = 'var(--error)';
+        detail.textContent = '';
+        el.style.background = 'rgba(231,76,60,0.05)';
+        el.style.borderRadius = '12px';
+        el.style.padding = '1.5rem';
+      }
+
+      setTimeout(() => {
+        el.style.display = 'none';
+      }, 5000);
+    }
+  </script>
+` }) %>

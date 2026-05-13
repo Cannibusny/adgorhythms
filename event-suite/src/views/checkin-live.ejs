@@ -1,0 +1,125 @@
+<%- include('layout-start', { title: 'Live — ' + event.name, promoter: promoter }) %>
+
+<div style="text-align: center; margin-bottom: 1.5rem;">
+  <h1><%= event.name %></h1>
+  <h2>Live Attendance Dashboard</h2>
+  <div style="font-size: 0.8rem; color: var(--text-muted);" id="lastUpdate">Updating...</div>
+</div>
+
+<!-- Big Attendance Counter -->
+<div class="card" style="padding: 2.5rem; text-align: center; margin-bottom: 1.5rem; border-color: var(--accent);">
+  <div style="font-size: 4rem; font-weight: 800; line-height: 1;" id="bigCounter">- / -</div>
+  <div style="font-size: 1.1rem; color: var(--text-muted); margin-top: 0.5rem;">Checked In</div>
+  <div style="width: 100%; height: 12px; background: var(--surface-2); border-radius: 6px; margin-top: 1rem; overflow: hidden;">
+    <div id="progressBar" style="height: 100%; background: var(--success); border-radius: 6px; transition: width 0.5s;"></div>
+  </div>
+  <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;" id="progressPercent">0%</div>
+</div>
+
+<!-- Table Breakdown -->
+<div class="stat-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1.5rem;">
+  <div class="stat-card" style="border-color: var(--gold);">
+    <div class="stat-number" style="color: var(--gold);" id="goldCount">-</div>
+    <div class="stat-label">Gold Tables</div>
+    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;" id="goldDetail">- / - checked in</div>
+  </div>
+  <div class="stat-card" style="border-color: var(--premium);">
+    <div class="stat-number" style="color: var(--premium);" id="premiumCount">-</div>
+    <div class="stat-label">Premium Tables</div>
+    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;" id="premiumDetail">- / - checked in</div>
+  </div>
+</div>
+
+<!-- Revenue -->
+<div class="stat-grid" style="grid-template-columns: 1fr; margin-bottom: 1.5rem;">
+  <div class="stat-card">
+    <div class="stat-number" style="color: var(--success);" id="revenueTotal">$0.00</div>
+    <div class="stat-label">Total Revenue</div>
+  </div>
+</div>
+
+<!-- Search -->
+<div class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+  <h3 style="margin-bottom: 0.75rem;">Search Attendees</h3>
+  <input type="text" id="searchInput" placeholder="Search by name, email, or phone..." style="font-size: 1rem; margin-bottom: 0.5rem;" />
+  <div id="searchResults" style="max-height: 300px; overflow-y: auto;"></div>
+</div>
+
+<!-- Live Feed -->
+<div class="card" style="padding: 1.5rem;">
+  <h3 style="margin-bottom: 0.75rem;">Recent Check-Ins</h3>
+  <div id="liveFeed" style="max-height: 400px; overflow-y: auto;"></div>
+</div>
+
+<div style="text-align: center; margin-top: 1.5rem;">
+  <a href="/checkin/<%= event.id %>/admin" style="color: var(--text-muted); text-decoration: none;">&larr; Admin Panel</a>
+</div>
+
+<script>
+var eventId = '<%= event.id %>';
+
+function refreshDashboard() {
+  fetch('/checkin/' + eventId + '/stats')
+    .then(function(r) { return r.json(); })
+    .then(function(s) {
+      var total = parseInt(s.total) || 0;
+      var checkedIn = parseInt(s.checked_in) || 0;
+      var pct = total > 0 ? Math.round((checkedIn / total) * 100) : 0;
+
+      document.getElementById('bigCounter').textContent = checkedIn + ' / ' + total;
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressPercent').textContent = pct + '% checked in';
+      document.getElementById('goldCount').textContent = s.gold_total || 0;
+      document.getElementById('goldDetail').textContent = (s.gold_checked_in || 0) + ' / ' + (s.gold_total || 0) + ' checked in';
+      document.getElementById('premiumCount').textContent = s.premium_total || 0;
+      document.getElementById('premiumDetail').textContent = (s.premium_checked_in || 0) + ' / ' + (s.premium_total || 0) + ' checked in';
+
+      var rev = parseFloat(s.total_revenue) || 0;
+      document.getElementById('revenueTotal').textContent = '$' + rev.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('lastUpdate').textContent = 'Updated ' + new Date().toLocaleTimeString();
+    }).catch(function() {});
+
+  fetch('/checkin/' + eventId + '/recent')
+    .then(function(r) { return r.json(); })
+    .then(function(list) {
+      var html = '';
+      list.forEach(function(a) {
+        var time = a.checked_in_at ? new Date(a.checked_in_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+        var color = a.table_type === 'Gold' ? 'var(--gold)' : a.table_type === 'Premium' ? 'var(--premium)' : 'var(--text-muted)';
+        html += '<div style="padding: 0.6rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">';
+        html += '<div><strong>' + a.name + '</strong> <span style="color: ' + color + '; font-size: 0.85rem;">' + a.table_type + ' for ' + a.table_size + '</span></div>';
+        html += '<span style="color: var(--text-muted); font-size: 0.85rem;">' + time + '</span>';
+        html += '</div>';
+      });
+      document.getElementById('liveFeed').innerHTML = html || '<p style="color: var(--text-muted); text-align: center;">Waiting for check-ins...</p>';
+    }).catch(function() {});
+}
+
+var searchTimeout;
+document.getElementById('searchInput').addEventListener('input', function() {
+  clearTimeout(searchTimeout);
+  var q = this.value.trim();
+  if (q.length < 2) { document.getElementById('searchResults').innerHTML = ''; return; }
+  searchTimeout = setTimeout(function() {
+    fetch('/checkin/' + eventId + '/search?q=' + encodeURIComponent(q))
+      .then(function(r) { return r.json(); })
+      .then(function(results) {
+        var html = '';
+        results.forEach(function(a) {
+          var color = a.table_type === 'Gold' ? 'var(--gold)' : a.table_type === 'Premium' ? 'var(--premium)' : 'var(--text-muted)';
+          var status = a.checked_in ? '<span style="color: var(--success);">\u2705 Checked In</span>' : '<span style="color: var(--text-muted);">Not Yet</span>';
+          html += '<div style="padding: 0.6rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">';
+          html += '<div><strong>' + a.name + '</strong> <span style="color: ' + color + '; font-size: 0.85rem;">' + a.table_type + '</span></div>';
+          html += '<div>' + status + '</div>';
+          html += '</div>';
+        });
+        document.getElementById('searchResults').innerHTML = html || '<p style="color: var(--text-muted);">No results</p>';
+      }).catch(function() {});
+  }, 300);
+});
+
+refreshDashboard();
+setInterval(refreshDashboard, 3000);
+</script>
+
+<%- include('layout-end', { registerSW: true }) %>

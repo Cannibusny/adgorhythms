@@ -1,0 +1,60 @@
+<% var title = 'Create Event — ADgorhythms Event Suite'; %>
+<%- include('layout', { body: `
+  <div style="margin-bottom: 2rem;">
+    <h1>Create Event</h1>
+    <h2>Set up your event details and ticket pricing</h2>
+  </div>
+
+  ${typeof error !== 'undefined' && error ? '<div class="error-msg">' + error + '</div>' : ''}
+
+  <div class="card" style="padding: 2rem;">
+    <form method="POST" action="/events/new">
+      <label for="name">Event Name *</label>
+      <input type="text" name="name" id="name" placeholder="Summer Rooftop Party" required
+        value="${typeof form !== 'undefined' && form ? form.name || '' : ''}" />
+
+      <label for="description">Description</label>
+      <textarea name="description" id="description" rows="3"
+        placeholder="Tell attendees what to expect..."
+        style="resize: vertical;">${typeof form !== 'undefined' && form ? form.description || '' : ''}</textarea>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div>
+          <label for="date">Date *</label>
+          <input type="date" name="date" id="date" required
+            value="${typeof form !== 'undefined' && form ? form.date || '' : ''}" />
+        </div>
+        <div>
+          <label for="time">Time *</label>
+          <input type="time" name="time" id="time" required
+            value="${typeof form !== 'undefined' && form ? form.time || '' : ''}" />
+        </div>
+      </div>
+
+      <label for="location">Location *</label>
+      <input type="text" name="location" id="location" placeholder="Rooftop Bar, 123 Main St, NYC" required
+        value="${typeof form !== 'undefined' && form ? form.location || '' : ''}" />
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div>
+          <label for="ticketPrice">Ticket Price ($) *</label>
+          <input type="number" name="ticketPrice" id="ticketPrice" step="0.01" min="0" placeholder="25.00" required
+            value="${typeof form !== 'undefined' && form ? form.ticketPrice || '' : ''}" />
+        </div>
+        <div>
+          <label for="maxCapacity">Max Capacity *</label>
+          <input type="number" name="maxCapacity" id="maxCapacity" min="1" placeholder="200" required
+            value="${typeof form !== 'undefined' && form ? form.maxCapacity || '' : ''}" />
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+        Create Event
+      </button>
+    </form>
+  </div>
+
+  <div style="text-align: center; margin-top: 1rem;">
+    <a href="/events" style="color: var(--text-muted); text-decoration: none;">← Back to My Events</a>
+  </div>
+` }) %>

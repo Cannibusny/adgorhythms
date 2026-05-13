@@ -1,0 +1,46 @@
+<% var title = 'Dashboard — ADgorhythms Event Suite'; %>
+<%- include('layout', { body: `
+  <div style="margin-bottom: 2rem;">
+    <h1>Connected Accounts</h1>
+    <h2>Welcome back, ${promoter.name || promoter.email}${promoter.business_name ? ' — ' + promoter.business_name : ''}</h2>
+  </div>
+
+  ${flash.meta === 'connected' ? '<div class="flash flash-success">Meta Ads connected successfully!</div>' : ''}
+  ${flash.google === 'connected' ? '<div class="flash flash-success">Google Ads connected successfully!</div>' : ''}
+  ${flash.stripe === 'connected' ? '<div class="flash flash-success">Stripe connected successfully!</div>' : ''}
+  ${flash.twilio === 'connected' ? '<div class="flash flash-success">Twilio connected successfully!</div>' : ''}
+  ${flash.klaviyo === 'connected' ? '<div class="flash flash-success">Klaviyo connected successfully!</div>' : ''}
+  ${flash.meta === 'error' ? '<div class="flash flash-error">Failed to connect Meta Ads. Please try again.</div>' : ''}
+  ${flash.google === 'error' ? '<div class="flash flash-error">Failed to connect Google Ads. Please try again.</div>' : ''}
+  ${flash.stripe === 'error' ? '<div class="flash flash-error">Failed to connect Stripe. Please try again.</div>' : ''}
+
+  ${platforms.map(p => {
+    const badgeClass = p.status === 'active' ? 'badge-active' :
+                       p.status === 'error' ? 'badge-error' :
+                       p.status === 'expired' ? 'badge-expired' : 'badge-inactive';
+    const isConnected = p.status === 'active';
+    return '<div class="card">' +
+      '<div class="card-header">' +
+        '<h3>' + p.label + '</h3>' +
+        '<span class="badge ' + badgeClass + '">' + p.statusText + '</span>' +
+      '</div>' +
+      (p.accountId ? '<div class="card-meta">Account: ' + p.accountId + '</div>' : '') +
+      (p.expiresAt ? '<div class="card-meta">Token expires: ' + new Date(p.expiresAt).toLocaleDateString() + '</div>' : '') +
+      (p.lastRefreshed ? '<div class="card-meta">Last refreshed: ' + new Date(p.lastRefreshed).toLocaleDateString() + '</div>' : '') +
+      '<div class="actions">' +
+        (isConnected
+          ? '<form method="POST" action="/oauth/' + p.key + '/disconnect" style="display:inline;">' +
+              (p.type === 'api_key' ? '<input type="hidden" />' : '') +
+              '<button type="submit" class="btn btn-danger btn-sm">Disconnect</button>' +
+            '</form>' +
+            (p.type === 'api_key'
+              ? '<a href="' + p.connectUrl + '" class="btn btn-primary btn-sm">Update</a>'
+              : '')
+          : '<a href="' + p.connectUrl + '" class="btn btn-primary btn-sm">' +
+              (p.type === 'oauth' ? 'Connect via OAuth' : 'Add Credentials') +
+            '</a>'
+        ) +
+      '</div>' +
+    '</div>';
+  }).join('')}
+` }) %>

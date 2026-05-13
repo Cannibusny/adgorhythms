@@ -1,0 +1,10 @@
+  </div>
+  <% if (typeof registerSW !== 'undefined' && registerSW) { %>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function() {});
+    }
+  </script>
+  <% } %>
+</body>
+</html>
