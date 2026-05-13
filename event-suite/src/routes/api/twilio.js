@@ -5,7 +5,7 @@ const db = require('../../db');
 
 const router = express.Router();
 
-router.get('/settings', requireAuth, async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   const result = await db.query(
     'SELECT account_id, status FROM credentials WHERE promoter_id = $1 AND platform = $2',
     [req.session.promoterId, 'twilio']
