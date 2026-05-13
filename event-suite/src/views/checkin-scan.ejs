@@ -153,7 +153,7 @@ function manualCheckIn(e) {
   e.preventDefault();
   var val = document.getElementById('manualInput').value.trim();
   if (!val) return;
-  doVerify({ ticketCode: val, searchQuery: val });
+  doVerify({ searchQuery: val });
   document.getElementById('manualInput').value = '';
 }
 
