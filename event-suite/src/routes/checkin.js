@@ -74,7 +74,7 @@ router.post('/new', requireAuth, async (req, res) => {
     }
   }
 
-  res.redirect(`/checkin/${eventId}/admin`);
+  res.redirect(303, `/checkin/${eventId}/admin`);
 });
 
 // ─── Registrations View ─────────────────────────────────
@@ -284,7 +284,7 @@ router.post('/:eventId/admin/import', requireAuth, upload.single('csvFile'), asy
   if (eventResult.rows.length === 0) return res.status(404).send('Event not found');
 
   if (!req.file) {
-    return res.redirect(`/checkin/${eventId}/admin?error=No+file+uploaded`);
+    return res.redirect(303, `/checkin/${eventId}/admin?error=No+file+uploaded`);
   }
 
   try {
@@ -335,10 +335,10 @@ router.post('/:eventId/admin/import', requireAuth, upload.single('csvFile'), asy
       imported++;
     }
 
-    res.redirect(`/checkin/${eventId}/admin?success=Imported+${imported}+attendees`);
+    res.redirect(303, `/checkin/${eventId}/admin?success=Imported+${imported}+attendees`);
   } catch (err) {
     console.error('CSV import error:', err);
-    res.redirect(`/checkin/${eventId}/admin?error=CSV+parse+error:+${encodeURIComponent(err.message)}`);
+    res.redirect(303, `/checkin/${eventId}/admin?error=CSV+parse+error:+${encodeURIComponent(err.message)}`);
   }
 });
 
@@ -355,7 +355,7 @@ router.post('/:eventId/admin/add', requireAuth, async (req, res) => {
   if (eventResult.rows.length === 0) return res.status(404).send('Event not found');
 
   if (!name) {
-    return res.redirect(`/checkin/${eventId}/admin?error=Name+is+required`);
+    return res.redirect(303, `/checkin/${eventId}/admin?error=Name+is+required`);
   }
 
   const ticketCode = crypto.randomBytes(12).toString('hex');
@@ -382,7 +382,7 @@ router.post('/:eventId/admin/add', requireAuth, async (req, res) => {
      parseFloat(amountPaid || '0'), ticketCode, qrDataUrl, 'physical_sale', saleLocation || '']
   );
 
-  res.redirect(`/checkin/${eventId}/admin?success=Added+${encodeURIComponent(name)}`);
+  res.redirect(303, `/checkin/${eventId}/admin?success=Added+${encodeURIComponent(name)}`);
 });
 
 // ─── Mobile Check-In Page ───────────────────────────────
@@ -636,7 +636,7 @@ router.post('/:eventId/admin/send-followup', requireAuth, async (req, res) => {
     [eventId]
   );
 
-  res.redirect(`/checkin/${eventId}/admin?success=Followup+sent+to+${sentCount}+attendees`);
+  res.redirect(303, `/checkin/${eventId}/admin?success=Followup+sent+to+${sentCount}+attendees`);
 });
 
 // ─── Attendee QR Code / Ticket Page (public) ────────────
