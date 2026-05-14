@@ -1,0 +1,107 @@
+<%- include('layout-start', { title: event.name + ' — Registrations', promoter: promoter }) %>
+
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+  <div>
+    <h1><%= event.name %></h1>
+    <h2>Guest Registrations</h2>
+  </div>
+  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+    <a href="/checkin/<%= event.id %>/registrations/export" class="btn btn-primary btn-sm">Export CSV</a>
+    <a href="/checkin/<%= event.id %>/qr" class="btn btn-primary btn-sm" style="background: var(--success);">View QR Code</a>
+    <a href="/checkin/<%= event.id %>/admin" class="btn btn-sm" style="background: var(--surface-2); color: var(--text);">Check-In View</a>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-number"><%= registrations.length %></div>
+    <div class="stat-label">Total Registrations</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number"><%= registrations.reduce((sum, r) => sum + r.group_size, 0) %></div>
+    <div class="stat-label">Total Guests</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" style="color: var(--gold);"><%= registrations.filter(r => r.package_name && r.package_name.includes('Gold')).length %></div>
+    <div class="stat-label">Gold Packages</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" style="color: var(--premium);"><%= registrations.filter(r => r.package_name && r.package_name.includes('Premium')).length %></div>
+    <div class="stat-label">Premium Packages</div>
+  </div>
+</div>
+
+<!-- Search & Filter -->
+<div class="card" style="margin-bottom: 1rem; padding: 1rem;">
+  <input type="text" id="searchInput" placeholder="Search by name, email, phone, or package..."
+    style="margin-bottom: 0; width: 100%;" oninput="filterTable()" />
+</div>
+
+<!-- Registrations Table -->
+<div class="card" style="padding: 0; overflow-x: auto;">
+  <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+    <thead>
+      <tr style="background: var(--surface-2); border-bottom: 1px solid var(--border);">
+        <th style="padding: 0.75rem 1rem; text-align: left; color: var(--text-muted); font-weight: 500;">Name</th>
+        <th style="padding: 0.75rem 0.5rem; text-align: left; color: var(--text-muted); font-weight: 500;">Phone</th>
+        <th style="padding: 0.75rem 0.5rem; text-align: left; color: var(--text-muted); font-weight: 500;">Email</th>
+        <th style="padding: 0.75rem 0.5rem; text-align: center; color: var(--text-muted); font-weight: 500;">Group</th>
+        <th style="padding: 0.75rem 0.5rem; text-align: left; color: var(--text-muted); font-weight: 500;">Package</th>
+        <th style="padding: 0.75rem 0.5rem; text-align: left; color: var(--text-muted); font-weight: 500;">Notes</th>
+        <th style="padding: 0.75rem 1rem; text-align: right; color: var(--text-muted); font-weight: 500;">Registered</th>
+      </tr>
+    </thead>
+    <tbody id="registrationsBody">
+      <% if (registrations.length === 0) { %>
+        <tr>
+          <td colspan="7" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+            No registrations yet. Share the QR code to start collecting signups!
+          </td>
+        </tr>
+      <% } else { %>
+        <% registrations.forEach(reg => { %>
+          <tr class="reg-row" style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 0.65rem 1rem; font-weight: 500;"><%= reg.full_name %></td>
+            <td style="padding: 0.65rem 0.5rem;"><%= reg.phone %></td>
+            <td style="padding: 0.65rem 0.5rem;"><%= reg.email %></td>
+            <td style="padding: 0.65rem 0.5rem; text-align: center;"><%= reg.group_size %></td>
+            <td style="padding: 0.65rem 0.5rem;">
+              <% if (reg.package_name) { %>
+                <span style="padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;
+                  background: <%= reg.package_name.includes('Gold') ? 'var(--gold-bg, rgba(255,215,0,0.1))' : 'rgba(199,146,234,0.1)' %>;
+                  color: <%= reg.package_name.includes('Gold') ? 'var(--gold)' : 'var(--premium)' %>;
+                  border: 1px solid <%= reg.package_name.includes('Gold') ? 'rgba(255,215,0,0.3)' : 'rgba(199,146,234,0.3)' %>;">
+                  <%= reg.package_name %>
+                </span>
+              <% } else { %>
+                <span style="color: var(--text-muted);">—</span>
+              <% } %>
+            </td>
+            <td style="padding: 0.65rem 0.5rem; color: var(--text-muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= reg.notes || '—' %></td>
+            <td style="padding: 0.65rem 1rem; text-align: right; color: var(--text-muted); font-size: 0.8rem;">
+              <%= new Date(reg.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %>
+              <%= new Date(reg.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %>
+            </td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<div style="text-align: center; margin-top: 1.5rem;">
+  <a href="/checkin" style="color: var(--text-muted); text-decoration: none;">&larr; Back to My Events</a>
+</div>
+
+<script>
+function filterTable() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.reg-row').forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(query) ? '' : 'none';
+  });
+}
+</script>
+
+<%- include('layout-end') %>

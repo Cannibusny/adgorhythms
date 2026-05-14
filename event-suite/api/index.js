@@ -21,6 +21,7 @@ const klaviyoRoutes = require('../src/routes/api/klaviyo');
 const statusRoutes = require('../src/routes/api/status');
 const eventRoutes = require('../src/routes/events');
 const checkinRoutes = require('../src/routes/checkin');
+const registerPublicRoutes = require('../src/routes/register-public');
 
 const app = express();
 
@@ -65,6 +66,7 @@ app.use('/settings/klaviyo', klaviyoRoutes);
 app.use('/api', statusRoutes);
 app.use('/events', eventRoutes);
 app.use('/checkin', checkinRoutes);
+app.use('/e', registerPublicRoutes);
 
 // Static files for PWA
 app.use(express.static(path.join(__dirname, '..', 'src', 'public')));
@@ -239,6 +241,34 @@ module.exports = async (req, res) => {
           checked_in_by UUID REFERENCES promoters(id),
           checked_in_at TIMESTAMP DEFAULT NOW()
         );
+
+        CREATE TABLE IF NOT EXISTS event_packages (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          event_id UUID REFERENCES checkin_events(id) ON DELETE CASCADE,
+          tier VARCHAR(50) NOT NULL DEFAULT 'Gold',
+          name VARCHAR(255) NOT NULL,
+          price DECIMAL(10,2) NOT NULL DEFAULT 0,
+          description TEXT DEFAULT '',
+          created_at TIMESTAMP DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_event_packages_event ON event_packages (event_id);
+
+        CREATE TABLE IF NOT EXISTS guest_registrations (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          event_id UUID REFERENCES checkin_events(id) ON DELETE CASCADE,
+          promoter_id UUID REFERENCES promoters(id) ON DELETE CASCADE,
+          full_name VARCHAR(255) NOT NULL,
+          phone VARCHAR(50) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          group_size INTEGER DEFAULT 1,
+          package_id UUID,
+          package_name VARCHAR(255),
+          notes TEXT,
+          created_at TIMESTAMP DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_guest_reg_event ON guest_registrations (event_id);
+        CREATE INDEX IF NOT EXISTS idx_guest_reg_promoter ON guest_registrations (promoter_id);
+        CREATE INDEX IF NOT EXISTS idx_guest_reg_email ON guest_registrations (email);
       `);
       migrated = true;
     } catch (err) {

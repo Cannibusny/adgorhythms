@@ -36,6 +36,12 @@ router.post('/new', requireAuth, async (req, res) => {
   const promoterId = req.session.promoterId;
   const { name, description, date, time, location, city, region, currency } = req.body;
 
+  // Package arrays from form (qs parser with extended:true strips brackets)
+  const pkgNames = req.body.pkg_name || req.body['pkg_name[]'] || [];
+  const pkgPrices = req.body.pkg_price || req.body['pkg_price[]'] || [];
+  const pkgDescs = req.body.pkg_desc || req.body['pkg_desc[]'] || [];
+  const pkgTiers = req.body.pkg_tier || req.body['pkg_tier[]'] || [];
+
   if (!name || !date || !time || !location) {
     return res.render('checkin-event-new', {
       promoter: { name: 'promoter' },
@@ -50,7 +56,103 @@ router.post('/new', requireAuth, async (req, res) => {
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
     [promoterId, name, description || '', eventDate, location, city || '', region || 'NYC', currency || 'USD']
   );
-  res.redirect(`/checkin/${result.rows[0].id}/admin`);
+  const eventId = result.rows[0].id;
+
+  // Create packages
+  const names = Array.isArray(pkgNames) ? pkgNames : [pkgNames];
+  const prices = Array.isArray(pkgPrices) ? pkgPrices : [pkgPrices];
+  const descs = Array.isArray(pkgDescs) ? pkgDescs : [pkgDescs];
+  const tiers = Array.isArray(pkgTiers) ? pkgTiers : [pkgTiers];
+
+  for (let i = 0; i < names.length; i++) {
+    if (names[i] && prices[i]) {
+      await db.query(
+        `INSERT INTO event_packages (event_id, tier, name, price, description)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [eventId, tiers[i] || 'Gold', names[i], parseFloat(prices[i]) || 0, descs[i] || '']
+      );
+    }
+  }
+
+  res.redirect(`/checkin/${eventId}/admin`);
+});
+
+// ─── Registrations View ─────────────────────────────────
+router.get('/:eventId/registrations', requireAuth, async (req, res) => {
+  const { eventId } = req.params;
+  const promoterId = req.session.promoterId;
+
+  const eventResult = await db.query(
+    'SELECT * FROM checkin_events WHERE id = $1 AND promoter_id = $2',
+    [eventId, promoterId]
+  );
+  if (eventResult.rows.length === 0) return res.status(404).send('Event not found');
+
+  const registrations = await db.query(
+    'SELECT * FROM guest_registrations WHERE event_id = $1 ORDER BY created_at DESC',
+    [eventId]
+  );
+
+  const promoterResult = await db.query('SELECT name FROM promoters WHERE id = $1', [promoterId]);
+
+  res.render('event-registrations', {
+    event: eventResult.rows[0],
+    registrations: registrations.rows,
+    promoter: promoterResult.rows[0],
+  });
+});
+
+// ─── Export Registrations CSV ────────────────────────────
+router.get('/:eventId/registrations/export', requireAuth, async (req, res) => {
+  const { eventId } = req.params;
+  const promoterId = req.session.promoterId;
+
+  const eventResult = await db.query(
+    'SELECT * FROM checkin_events WHERE id = $1 AND promoter_id = $2',
+    [eventId, promoterId]
+  );
+  if (eventResult.rows.length === 0) return res.status(404).send('Event not found');
+
+  const registrations = await db.query(
+    'SELECT * FROM guest_registrations WHERE event_id = $1 ORDER BY created_at DESC',
+    [eventId]
+  );
+
+  const rows = registrations.rows;
+  const csvHeader = 'Full Name,Phone,Email,Group Size,Package,Notes,Registered At\n';
+  const csvBody = rows.map(r =>
+    `"${r.full_name}","${r.phone}","${r.email}",${r.group_size},"${r.package_name || ''}","${(r.notes || '').replace(/"/g, '""')}","${new Date(r.created_at).toISOString()}"`
+  ).join('\n');
+
+  const filename = `${eventResult.rows[0].name.replace(/[^a-z0-9]/gi, '-')}-registrations.csv`;
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.send(csvHeader + csvBody);
+});
+
+// ─── QR Code Page ────────────────────────────────────────
+router.get('/:eventId/qr', requireAuth, async (req, res) => {
+  const { eventId } = req.params;
+  const promoterId = req.session.promoterId;
+
+  const eventResult = await db.query(
+    'SELECT * FROM checkin_events WHERE id = $1 AND promoter_id = $2',
+    [eventId, promoterId]
+  );
+  if (eventResult.rows.length === 0) return res.status(404).send('Event not found');
+
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+  const registrationUrl = `${baseUrl}/e/${eventId}`;
+  const qrDataUrl = await QRCode.toDataURL(registrationUrl, { width: 400, margin: 2 });
+
+  const promoterResult = await db.query('SELECT name FROM promoters WHERE id = $1', [promoterId]);
+
+  res.render('event-qr', {
+    event: eventResult.rows[0],
+    qrDataUrl,
+    registrationUrl,
+    promoter: promoterResult.rows[0],
+  });
 });
 
 // ─── Admin Panel ────────────────────────────────────────
