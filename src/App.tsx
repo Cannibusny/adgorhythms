@@ -8,6 +8,14 @@ import CampaignManager from './screens/CampaignManager';
 import DiscoveryCallPrep from './screens/DiscoveryCallPrep';
 import RevenueTracker from './screens/RevenueTracker';
 import Settings from './screens/Settings';
+import ContactsPage from './screens/crm/ContactsPage';
+import ContactDetailPage from './screens/crm/ContactDetailPage';
+import DealsPipelinePage from './screens/crm/DealsPipelinePage';
+import DealDetailPage from './screens/crm/DealDetailPage';
+import CampaignsPage from './screens/crm/CampaignsPage';
+import SequencesPage from './screens/crm/SequencesPage';
+import WorkflowsPage from './screens/crm/WorkflowsPage';
+import CRMDashboardPage from './screens/crm/CRMDashboardPage';
 import { useEffect } from 'react';
 import { storage } from './lib/storage';
 import {
@@ -50,6 +58,14 @@ export default function App() {
             <Route path="/discovery" element={<DiscoveryCallPrep />} />
             <Route path="/revenue" element={<RevenueTracker />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/dashboard" element={<CRMDashboardPage />} />
+            <Route path="/contacts" element={<ContactsPage />} />
+            <Route path="/contacts/:id" element={<ContactDetailPage />} />
+            <Route path="/deals" element={<DealsPipelinePage />} />
+            <Route path="/deals/:id" element={<DealDetailPage />} />
+            <Route path="/email-campaigns" element={<CampaignsPage />} />
+            <Route path="/sequences" element={<SequencesPage />} />
+            <Route path="/workflows" element={<WorkflowsPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
