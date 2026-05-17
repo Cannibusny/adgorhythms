@@ -10,17 +10,30 @@ import {
   Brain,
   Calendar,
   Copy,
+  Target,
+  Mail,
+  Zap,
+  ListOrdered,
+  BarChart3,
 } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 
-const navItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+const agencyItems = [
+  { to: '/', icon: LayoutDashboard, label: 'Agency Home' },
   { to: '/pipeline', icon: Users, label: 'Client Pipeline' },
   { to: '/proposals', icon: FileText, label: 'Proposals' },
   { to: '/campaigns', icon: Megaphone, label: 'Campaigns' },
   { to: '/discovery', icon: Phone, label: 'Discovery Calls' },
   { to: '/revenue', icon: DollarSign, label: 'Revenue' },
-  { to: '/settings', icon: Settings, label: 'Settings' },
+];
+
+const crmItems = [
+  { to: '/dashboard', icon: BarChart3, label: 'CRM Dashboard' },
+  { to: '/contacts', icon: Users, label: 'Contacts' },
+  { to: '/deals', icon: Target, label: 'Deals Pipeline' },
+  { to: '/email-campaigns', icon: Mail, label: 'Email Campaigns' },
+  { to: '/sequences', icon: ListOrdered, label: 'Sequences' },
+  { to: '/workflows', icon: Zap, label: 'Workflows' },
 ];
 
 const CALENDLY_URL = 'https://calendly.com/mrsjw136/free-discovery-call-adgorhythms-meeting';
@@ -58,7 +71,8 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {navItems.map(({ to, icon: Icon, label }) => (
+        <div className="px-3 pb-1 pt-1 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Agency</div>
+        {agencyItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
@@ -75,6 +89,37 @@ export default function Sidebar() {
             <span>{label}</span>
           </NavLink>
         ))}
+        <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">CRM & Marketing</div>
+        {crmItems.map(({ to, icon: Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                isActive
+                  ? 'bg-[#6C47FF] text-white shadow-lg shadow-[#6C47FF]/30'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`
+            }
+          >
+            <Icon size={18} />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+        <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">System</div>
+        <NavLink
+          to="/settings"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+              isActive
+                ? 'bg-[#6C47FF] text-white shadow-lg shadow-[#6C47FF]/30'
+                : 'text-gray-400 hover:bg-white/5 hover:text-white'
+            }`
+          }
+        >
+          <Settings size={18} />
+          <span>Settings</span>
+        </NavLink>
       </nav>
 
       <div className="px-3 py-4 border-t border-white/5 space-y-3">
