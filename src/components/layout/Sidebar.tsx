@@ -15,6 +15,12 @@ import {
   Zap,
   ListOrdered,
   BarChart3,
+  Share2,
+  PenSquare,
+  Clock,
+  Inbox,
+  Hash,
+  Eye,
 } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 
@@ -34,6 +40,17 @@ const crmItems = [
   { to: '/email-campaigns', icon: Mail, label: 'Email Campaigns' },
   { to: '/sequences', icon: ListOrdered, label: 'Sequences' },
   { to: '/workflows', icon: Zap, label: 'Workflows' },
+];
+
+const socialItems = [
+  { to: '/social/accounts', icon: Share2, label: 'Social Accounts' },
+  { to: '/social/calendar', icon: Calendar, label: 'Content Calendar' },
+  { to: '/social/compose', icon: PenSquare, label: 'Compose Post' },
+  { to: '/social/scheduled', icon: Clock, label: 'Scheduled Posts' },
+  { to: '/social/analytics', icon: BarChart3, label: 'Post Analytics' },
+  { to: '/social/inbox', icon: Inbox, label: 'Social Inbox' },
+  { to: '/social/hashtags', icon: Hash, label: 'Hashtag Research' },
+  { to: '/social/competitors', icon: Eye, label: 'Competitors' },
 ];
 
 const CALENDLY_URL = 'https://calendly.com/mrsjw136/free-discovery-call-adgorhythms-meeting';
@@ -91,6 +108,23 @@ export default function Sidebar() {
         ))}
         <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">CRM & Marketing</div>
         {crmItems.map(({ to, icon: Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                isActive
+                  ? 'bg-[#6C47FF] text-white shadow-lg shadow-[#6C47FF]/30'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`
+            }
+          >
+            <Icon size={18} />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+        <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Social Media</div>
+        {socialItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
