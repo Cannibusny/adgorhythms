@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
@@ -117,6 +117,7 @@ const CALENDLY_URL = 'https://calendly.com/mrsjw136/free-discovery-call-adgorhyt
 
 export default function Sidebar() {
   const { addToast } = useToast();
+  const navigate = useNavigate();
 
   const copyCalendly = () => {
     navigator.clipboard.writeText(CALENDLY_URL);
@@ -125,15 +126,16 @@ export default function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 h-full w-60 bg-[#1A1A2E] flex flex-col z-40 border-r border-white/5">
-      <div className="flex items-center gap-3 px-5 py-6 border-b border-white/5">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#6C47FF] to-[#4C2FBF] flex-shrink-0">
-          <Brain size={18} className="text-white" />
-        </div>
-        <div>
+      <button
+        onClick={() => navigate('/dashboard')}
+        className="flex items-center gap-3 px-5 py-5 border-b border-white/5 w-full hover:bg-white/5 transition-all duration-150"
+      >
+        <img src="/logo-small.png" alt="ADgorhythms" className="w-10 h-10 rounded-xl flex-shrink-0" />
+        <div className="text-left">
           <div
             className="text-base font-black tracking-tight"
             style={{
-              background: 'linear-gradient(135deg, #6C47FF 0%, #00C896 100%)',
+              background: 'linear-gradient(135deg, #00D4FF 0%, #B4FF00 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -145,7 +147,7 @@ export default function Sidebar() {
             AI Marketing OS
           </div>
         </div>
-      </div>
+      </button>
 
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         <div className="px-3 pb-1 pt-1 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Agency</div>

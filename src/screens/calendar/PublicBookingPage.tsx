@@ -91,9 +91,7 @@ export default function PublicBookingPage() {
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-[#6C47FF]/20 flex items-center justify-center mx-auto mb-3">
-            <Calendar size={24} className="text-[#6C47FF]" />
-          </div>
+          <img src="/logo-small.png" alt="ADgorhythms" className="w-14 h-14 rounded-xl mx-auto mb-3" />
           <h1 className="text-2xl font-bold text-white">{calType.name}</h1>
           {calType.description && <p className="text-gray-400 text-sm mt-1">{calType.description}</p>}
           <div className="flex items-center justify-center gap-3 mt-2 text-xs text-gray-500">
