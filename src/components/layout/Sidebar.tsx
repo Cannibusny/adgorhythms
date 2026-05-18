@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
@@ -23,7 +23,6 @@ import {
   Sparkles,
   BookOpen,
   MessageSquare,
-  FileTemplate,
   Mail,
   Send,
   TrendingUp,
@@ -33,6 +32,13 @@ import {
   Link2,
   Shield,
   CalendarDays,
+  Code,
+  Map,
+  UserMinus,
+  PhoneCall,
+  Star,
+  Gift,
+  FileText as FileTextIcon,
 } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 
@@ -69,7 +75,7 @@ const aiItems = [
   { to: '/ai/generate', icon: Sparkles, label: 'AI Generator' },
   { to: '/ai/library', icon: BookOpen, label: 'Content Library' },
   { to: '/ai/brand-voice', icon: MessageSquare, label: 'Brand Voice' },
-  { to: '/ai/templates', icon: FileTemplate, label: 'Templates' },
+  { to: '/ai/templates', icon: Copy, label: 'Templates' },
 ];
 
 const emailItems = [
@@ -91,6 +97,26 @@ const seoItems = [
   { to: '/seo/backlinks', icon: Link2, label: 'Backlinks' },
   { to: '/seo/audit', icon: Shield, label: 'Site Audit' },
   { to: '/seo/competitors', icon: Eye, label: 'SEO Competitors' },
+  { to: '/seo/schema', icon: Code, label: 'Schema Markup' },
+];
+
+const aiEnhancementsItems = [
+  { to: '/ai/leads', icon: Brain, label: 'AI Lead Insights' },
+  { to: '/ai/journeys', icon: Map, label: 'Journey Mapper' },
+  { to: '/ai/competitors-intel', icon: Shield, label: 'Competitor Intel' },
+  { to: '/ai/ads', icon: Zap, label: 'Ad Optimizer' },
+  { to: '/ai/calls', icon: PhoneCall, label: 'Call Analyzer' },
+  { to: '/ai/churn', icon: UserMinus, label: 'Churn Predictor' },
+  { to: '/ai/roi', icon: DollarSign, label: 'ROI Dashboard' },
+];
+
+const reviewItems = [
+  { to: '/reviews/setup', icon: Settings, label: 'Review Setup' },
+  { to: '/reviews', icon: Star, label: 'Review Dashboard' },
+  { to: '/reviews/inbox', icon: Inbox, label: 'Review Inbox' },
+  { to: '/reviews/recovery', icon: Gift, label: 'Recovery Campaigns' },
+  { to: '/reviews/requests', icon: Send, label: 'Review Requests' },
+  { to: '/reviews/report', icon: FileTextIcon, label: 'Reputation Report' },
 ];
 
 const calendarItems = [
@@ -103,6 +129,7 @@ const CALENDLY_URL = 'https://calendly.com/mrsjw136/free-discovery-call-adgorhyt
 
 export default function Sidebar() {
   const { addToast } = useToast();
+  const navigate = useNavigate();
 
   const copyCalendly = () => {
     navigator.clipboard.writeText(CALENDLY_URL);
@@ -111,15 +138,16 @@ export default function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 h-full w-60 bg-[#1A1A2E] flex flex-col z-40 border-r border-white/5">
-      <div className="flex items-center gap-3 px-5 py-6 border-b border-white/5">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#6C47FF] to-[#4C2FBF] flex-shrink-0">
-          <Brain size={18} className="text-white" />
-        </div>
-        <div>
+      <button
+        onClick={() => navigate('/dashboard')}
+        className="flex items-center gap-3 px-5 py-5 border-b border-white/5 w-full hover:bg-white/5 transition-all duration-150"
+      >
+        <img src="/logo-small.png" alt="ADgorhythms" className="w-10 h-10 rounded-xl flex-shrink-0" />
+        <div className="text-left">
           <div
             className="text-base font-black tracking-tight"
             style={{
-              background: 'linear-gradient(135deg, #6C47FF 0%, #00C896 100%)',
+              background: 'linear-gradient(135deg, #00D4FF 0%, #B4FF00 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -131,7 +159,7 @@ export default function Sidebar() {
             AI Marketing OS
           </div>
         </div>
-      </div>
+      </button>
 
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         <div className="px-3 pb-1 pt-1 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Agency</div>
@@ -256,6 +284,40 @@ export default function Sidebar() {
         ))}
         <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Scheduling</div>
         {calendarItems.map(({ to, icon: Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                isActive
+                  ? 'bg-[#6C47FF] text-white shadow-lg shadow-[#6C47FF]/30'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`
+            }
+          >
+            <Icon size={18} />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+        <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">LuxeFlow Reviews</div>
+        {reviewItems.map(({ to, icon: Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                isActive
+                  ? 'bg-[#6C47FF] text-white shadow-lg shadow-[#6C47FF]/30'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`
+            }
+          >
+            <Icon size={18} />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+        <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">AI Intelligence</div>
+        {aiEnhancementsItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
