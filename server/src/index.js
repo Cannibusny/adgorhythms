@@ -22,6 +22,11 @@ import aiGenerateRouter from './routes/aiGenerate.js';
 import contentLibraryRouter from './routes/contentLibrary.js';
 import brandVoiceRouter from './routes/brandVoice.js';
 import contentTemplatesRouter from './routes/contentTemplates.js';
+import emailListsRouter from './routes/emailLists.js';
+import emailSubscribersRouter from './routes/emailSubscribers.js';
+import emailTemplatesRouter from './routes/emailTemplates.js';
+import emailTrackingRouter from './routes/emailTracking.js';
+import analyticsRouter from './routes/analytics.js';
 
 dotenv.config();
 
@@ -49,9 +54,14 @@ app.use('/api/ai', aiGenerateRouter);
 app.use('/api/content/library', contentLibraryRouter);
 app.use('/api/brand-voice', brandVoiceRouter);
 app.use('/api/templates', contentTemplatesRouter);
+app.use('/api/email/lists', emailListsRouter);
+app.use('/api/email/subscribers', emailSubscribersRouter);
+app.use('/api/email/templates', emailTemplatesRouter);
+app.use('/api/email', emailTrackingRouter);
+app.use('/api/analytics', analyticsRouter);
 
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'adgorhythms', version: '3.0.0' });
+  res.json({ status: 'ok', service: 'adgorhythms', version: '4.0.0' });
 });
 
 // Sequence automation cron - daily at 9 AM UTC
