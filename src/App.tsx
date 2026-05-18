@@ -44,6 +44,14 @@ import CalendarSettingsPage from './screens/calendar/CalendarSettingsPage';
 import BookingWidgetPage from './screens/calendar/BookingWidgetPage';
 import BookingsCalendarPage from './screens/calendar/BookingsCalendarPage';
 import PublicBookingPage from './screens/calendar/PublicBookingPage';
+import SchemaMarkupPage from './screens/seo/SchemaMarkupPage';
+import AiLeadInsightsPage from './screens/ai/AiLeadInsightsPage';
+import CustomerJourneyPage from './screens/ai/CustomerJourneyPage';
+import CompetitorIntelPage from './screens/ai/CompetitorIntelPage';
+import AdOptimizerPage from './screens/ai/AdOptimizerPage';
+import SalesCallAnalyzerPage from './screens/ai/SalesCallAnalyzerPage';
+import ChurnPredictorPage from './screens/ai/ChurnPredictorPage';
+import RoiDashboardPage from './screens/ai/RoiDashboardPage';
 import { useEffect } from 'react';
 import { storage } from './lib/storage';
 import {
@@ -122,6 +130,14 @@ export default function App() {
             <Route path="/calendar/widget" element={<BookingWidgetPage />} />
             <Route path="/calendar/bookings" element={<BookingsCalendarPage />} />
             <Route path="/book/:workspaceId/:calendarTypeId" element={<PublicBookingPage />} />
+            <Route path="/seo/schema" element={<SchemaMarkupPage />} />
+            <Route path="/ai/leads" element={<AiLeadInsightsPage />} />
+            <Route path="/ai/journeys" element={<CustomerJourneyPage />} />
+            <Route path="/ai/competitors-intel" element={<CompetitorIntelPage />} />
+            <Route path="/ai/ads" element={<AdOptimizerPage />} />
+            <Route path="/ai/calls" element={<SalesCallAnalyzerPage />} />
+            <Route path="/ai/churn" element={<ChurnPredictorPage />} />
+            <Route path="/ai/roi" element={<RoiDashboardPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

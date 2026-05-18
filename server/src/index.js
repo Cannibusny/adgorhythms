@@ -33,6 +33,14 @@ import seoAuditRouter from './routes/seoAudit.js';
 import calendarTypesRouter from './routes/calendarTypes.js';
 import calendarAvailabilityRouter from './routes/calendarAvailability.js';
 import calendarBookingsRouter from './routes/calendarBookings.js';
+import schemaMarkupRouter from './routes/schemaMarkup.js';
+import aiLeadScorerRouter from './routes/aiLeadScorer.js';
+import aiJourneyMapperRouter from './routes/aiJourneyMapper.js';
+import aiCompetitorIntelRouter from './routes/aiCompetitorIntel.js';
+import aiAdOptimizerRouter from './routes/aiAdOptimizer.js';
+import aiCallAnalyzerRouter from './routes/aiCallAnalyzer.js';
+import aiChurnPredictorRouter from './routes/aiChurnPredictor.js';
+import aiRoiCalculatorRouter from './routes/aiRoiCalculator.js';
 
 dotenv.config();
 
@@ -71,9 +79,17 @@ app.use('/api/seo/audits', seoAuditRouter);
 app.use('/api/calendar/types', calendarTypesRouter);
 app.use('/api/calendar/availability', calendarAvailabilityRouter);
 app.use('/api/calendar/bookings', calendarBookingsRouter);
+app.use('/api/seo/schema', schemaMarkupRouter);
+app.use('/api/ai/leads', aiLeadScorerRouter);
+app.use('/api/ai/journeys', aiJourneyMapperRouter);
+app.use('/api/ai/competitors-intel', aiCompetitorIntelRouter);
+app.use('/api/ai/ads', aiAdOptimizerRouter);
+app.use('/api/ai/calls', aiCallAnalyzerRouter);
+app.use('/api/ai/churn', aiChurnPredictorRouter);
+app.use('/api/ai/roi', aiRoiCalculatorRouter);
 
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'adgorhythms', version: '5.0.0' });
+  res.json({ status: 'ok', service: 'adgorhythms', version: '6.0.0' });
 });
 
 // Sequence automation cron - daily at 9 AM UTC

@@ -23,7 +23,6 @@ import {
   Sparkles,
   BookOpen,
   MessageSquare,
-  FileTemplate,
   Mail,
   Send,
   TrendingUp,
@@ -33,6 +32,10 @@ import {
   Link2,
   Shield,
   CalendarDays,
+  Code,
+  Map,
+  UserMinus,
+  PhoneCall,
 } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 
@@ -69,7 +72,7 @@ const aiItems = [
   { to: '/ai/generate', icon: Sparkles, label: 'AI Generator' },
   { to: '/ai/library', icon: BookOpen, label: 'Content Library' },
   { to: '/ai/brand-voice', icon: MessageSquare, label: 'Brand Voice' },
-  { to: '/ai/templates', icon: FileTemplate, label: 'Templates' },
+  { to: '/ai/templates', icon: Copy, label: 'Templates' },
 ];
 
 const emailItems = [
@@ -91,6 +94,17 @@ const seoItems = [
   { to: '/seo/backlinks', icon: Link2, label: 'Backlinks' },
   { to: '/seo/audit', icon: Shield, label: 'Site Audit' },
   { to: '/seo/competitors', icon: Eye, label: 'SEO Competitors' },
+  { to: '/seo/schema', icon: Code, label: 'Schema Markup' },
+];
+
+const aiEnhancementsItems = [
+  { to: '/ai/leads', icon: Brain, label: 'AI Lead Insights' },
+  { to: '/ai/journeys', icon: Map, label: 'Journey Mapper' },
+  { to: '/ai/competitors-intel', icon: Shield, label: 'Competitor Intel' },
+  { to: '/ai/ads', icon: Zap, label: 'Ad Optimizer' },
+  { to: '/ai/calls', icon: PhoneCall, label: 'Call Analyzer' },
+  { to: '/ai/churn', icon: UserMinus, label: 'Churn Predictor' },
+  { to: '/ai/roi', icon: DollarSign, label: 'ROI Dashboard' },
 ];
 
 const calendarItems = [
@@ -256,6 +270,23 @@ export default function Sidebar() {
         ))}
         <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Scheduling</div>
         {calendarItems.map(({ to, icon: Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                isActive
+                  ? 'bg-[#6C47FF] text-white shadow-lg shadow-[#6C47FF]/30'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`
+            }
+          >
+            <Icon size={18} />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+        <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">AI Intelligence</div>
+        {aiEnhancementsItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
