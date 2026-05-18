@@ -28,6 +28,14 @@ import AIGeneratorPage from './screens/ai/AIGeneratorPage';
 import ContentLibraryPage from './screens/ai/ContentLibraryPage';
 import BrandVoicePage from './screens/ai/BrandVoicePage';
 import ContentTemplatesPage from './screens/ai/ContentTemplatesPage';
+import EmailListsPage from './screens/email/EmailListsPage';
+import EmailTemplatesPage from './screens/email/EmailTemplatesPage';
+import EmailAnalyticsPage from './screens/email/EmailAnalyticsPage';
+import AnalyticsOverviewPage from './screens/analytics/AnalyticsOverviewPage';
+import TrafficAnalyticsPage from './screens/analytics/TrafficAnalyticsPage';
+import ConversionAnalyticsPage from './screens/analytics/ConversionAnalyticsPage';
+import AttributionReportPage from './screens/analytics/AttributionReportPage';
+import RevenueAnalyticsPage from './screens/analytics/RevenueAnalyticsPage';
 import { useEffect } from 'react';
 import { storage } from './lib/storage';
 import {
@@ -90,6 +98,14 @@ export default function App() {
             <Route path="/ai/library" element={<ContentLibraryPage />} />
             <Route path="/ai/brand-voice" element={<BrandVoicePage />} />
             <Route path="/ai/templates" element={<ContentTemplatesPage />} />
+            <Route path="/email/lists" element={<EmailListsPage />} />
+            <Route path="/email/templates" element={<EmailTemplatesPage />} />
+            <Route path="/email/analytics" element={<EmailAnalyticsPage />} />
+            <Route path="/analytics" element={<AnalyticsOverviewPage />} />
+            <Route path="/analytics/traffic" element={<TrafficAnalyticsPage />} />
+            <Route path="/analytics/conversions" element={<ConversionAnalyticsPage />} />
+            <Route path="/analytics/attribution" element={<AttributionReportPage />} />
+            <Route path="/analytics/revenue" element={<RevenueAnalyticsPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
