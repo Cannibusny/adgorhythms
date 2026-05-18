@@ -4,6 +4,7 @@ const QRCode = require('qrcode');
 const db = require('../db');
 const { requireAuth } = require('../middleware/auth');
 const { decrypt } = require('../utils/encryption');
+const { eventSchema, injectSchemas } = require('../utils/schema');
 
 const router = express.Router();
 
@@ -63,7 +64,8 @@ router.get('/:eventId', async (req, res) => {
   const ticketsRemaining = event.max_capacity - parseInt(event.tickets_sold, 10);
   const flash = req.query;
 
-  res.render('event-public', { event, ticketsRemaining, flash, promoter: null });
+  const extraSchemas = injectSchemas([eventSchema(event)]);
+  res.render('event-public', { event, ticketsRemaining, flash, promoter: null, extraSchemas });
 });
 
 // ─── Buy Ticket / Stripe Checkout ───────────────────────

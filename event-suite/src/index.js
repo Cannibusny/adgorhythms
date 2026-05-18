@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 
 const db = require('./db');
+const { organizationSchema, injectSchemas } = require('./utils/schema');
 
 // Routes
 const authRoutes = require('./routes/auth');
@@ -29,6 +30,8 @@ const { startTokenRefresher } = require('./jobs/tokenRefresher');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.set('trust proxy', 1);
 
 // View engine
 app.set('view engine', 'ejs');
@@ -62,6 +65,12 @@ app.use(session({
 
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Inject Organization schema on every page
+app.use((_req, res, next) => {
+  res.locals.schemas = injectSchemas([organizationSchema()]);
+  next();
+});
 
 // Routes
 app.use('/', authRoutes);
