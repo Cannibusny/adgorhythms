@@ -36,6 +36,28 @@ import TrafficAnalyticsPage from './screens/analytics/TrafficAnalyticsPage';
 import ConversionAnalyticsPage from './screens/analytics/ConversionAnalyticsPage';
 import AttributionReportPage from './screens/analytics/AttributionReportPage';
 import RevenueAnalyticsPage from './screens/analytics/RevenueAnalyticsPage';
+import KeywordResearchPage from './screens/seo/KeywordResearchPage';
+import BacklinkAnalysisPage from './screens/seo/BacklinkAnalysisPage';
+import SiteAuditPage from './screens/seo/SiteAuditPage';
+import SeoCompetitorPage from './screens/seo/SeoCompetitorPage';
+import CalendarSettingsPage from './screens/calendar/CalendarSettingsPage';
+import BookingWidgetPage from './screens/calendar/BookingWidgetPage';
+import BookingsCalendarPage from './screens/calendar/BookingsCalendarPage';
+import PublicBookingPage from './screens/calendar/PublicBookingPage';
+import SchemaMarkupPage from './screens/seo/SchemaMarkupPage';
+import AiLeadInsightsPage from './screens/ai/AiLeadInsightsPage';
+import CustomerJourneyPage from './screens/ai/CustomerJourneyPage';
+import CompetitorIntelPage from './screens/ai/CompetitorIntelPage';
+import AdOptimizerPage from './screens/ai/AdOptimizerPage';
+import SalesCallAnalyzerPage from './screens/ai/SalesCallAnalyzerPage';
+import ChurnPredictorPage from './screens/ai/ChurnPredictorPage';
+import RoiDashboardPage from './screens/ai/RoiDashboardPage';
+import ReviewSetupPage from './screens/reviews/ReviewSetupPage';
+import ReviewDashboardPage from './screens/reviews/ReviewDashboardPage';
+import ReviewInboxPage from './screens/reviews/ReviewInboxPage';
+import RecoveryCampaignsPage from './screens/reviews/RecoveryCampaignsPage';
+import ReviewRequestsPage from './screens/reviews/ReviewRequestsPage';
+import ReputationReportPage from './screens/reviews/ReputationReportPage';
 import { useEffect } from 'react';
 import { storage } from './lib/storage';
 import {
@@ -106,6 +128,28 @@ export default function App() {
             <Route path="/analytics/conversions" element={<ConversionAnalyticsPage />} />
             <Route path="/analytics/attribution" element={<AttributionReportPage />} />
             <Route path="/analytics/revenue" element={<RevenueAnalyticsPage />} />
+            <Route path="/seo/keywords" element={<KeywordResearchPage />} />
+            <Route path="/seo/backlinks" element={<BacklinkAnalysisPage />} />
+            <Route path="/seo/audit" element={<SiteAuditPage />} />
+            <Route path="/seo/competitors" element={<SeoCompetitorPage />} />
+            <Route path="/calendar/settings" element={<CalendarSettingsPage />} />
+            <Route path="/calendar/widget" element={<BookingWidgetPage />} />
+            <Route path="/calendar/bookings" element={<BookingsCalendarPage />} />
+            <Route path="/book/:workspaceId/:calendarTypeId" element={<PublicBookingPage />} />
+            <Route path="/seo/schema" element={<SchemaMarkupPage />} />
+            <Route path="/ai/leads" element={<AiLeadInsightsPage />} />
+            <Route path="/ai/journeys" element={<CustomerJourneyPage />} />
+            <Route path="/ai/competitors-intel" element={<CompetitorIntelPage />} />
+            <Route path="/ai/ads" element={<AdOptimizerPage />} />
+            <Route path="/ai/calls" element={<SalesCallAnalyzerPage />} />
+            <Route path="/ai/churn" element={<ChurnPredictorPage />} />
+            <Route path="/ai/roi" element={<RoiDashboardPage />} />
+            <Route path="/reviews/setup" element={<ReviewSetupPage />} />
+            <Route path="/reviews" element={<ReviewDashboardPage />} />
+            <Route path="/reviews/inbox" element={<ReviewInboxPage />} />
+            <Route path="/reviews/recovery" element={<RecoveryCampaignsPage />} />
+            <Route path="/reviews/requests" element={<ReviewRequestsPage />} />
+            <Route path="/reviews/report" element={<ReputationReportPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
