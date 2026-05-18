@@ -11,7 +11,13 @@ import activitiesRouter from './routes/activities.js';
 import campaignsRouter from './routes/campaigns.js';
 import sequencesRouter from './routes/sequences.js';
 import workflowsRouter from './routes/workflows.js';
+import socialAccountsRouter from './routes/socialAccounts.js';
+import socialPostsRouter from './routes/socialPosts.js';
+import socialInboxRouter from './routes/socialInbox.js';
+import hashtagsRouter from './routes/hashtags.js';
+import competitorsRouter from './routes/competitors.js';
 import { runSequenceAutomation } from './jobs/sequenceRunner.js';
+import { publishScheduledPosts } from './jobs/postPublisher.js';
 
 dotenv.config();
 
@@ -30,9 +36,14 @@ app.use('/api/activities', activitiesRouter);
 app.use('/api/campaigns', campaignsRouter);
 app.use('/api/sequences', sequencesRouter);
 app.use('/api/workflows', workflowsRouter);
+app.use('/api/social/accounts', socialAccountsRouter);
+app.use('/api/social/posts', socialPostsRouter);
+app.use('/api/social/inbox', socialInboxRouter);
+app.use('/api/hashtags', hashtagsRouter);
+app.use('/api/competitors', competitorsRouter);
 
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'adgorhythms-crm', version: '1.0.0' });
+  res.json({ status: 'ok', service: 'adgorhythms', version: '2.0.0' });
 });
 
 // Sequence automation cron - daily at 9 AM UTC
@@ -43,6 +54,15 @@ cron.schedule('0 9 * * *', async () => {
     console.log('[CRON] Sequence automation complete.');
   } catch (err) {
     console.error('[CRON] Sequence automation failed:', err);
+  }
+});
+
+// Post publisher cron - every minute
+cron.schedule('* * * * *', async () => {
+  try {
+    await publishScheduledPosts();
+  } catch (err) {
+    console.error('[CRON] Post publisher failed:', err);
   }
 });
 

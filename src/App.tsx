@@ -16,6 +16,14 @@ import CampaignsPage from './screens/crm/CampaignsPage';
 import SequencesPage from './screens/crm/SequencesPage';
 import WorkflowsPage from './screens/crm/WorkflowsPage';
 import CRMDashboardPage from './screens/crm/CRMDashboardPage';
+import SocialAccountsPage from './screens/social/SocialAccountsPage';
+import ContentCalendarPage from './screens/social/ContentCalendarPage';
+import PostComposerPage from './screens/social/PostComposerPage';
+import ScheduledPostsPage from './screens/social/ScheduledPostsPage';
+import PostAnalyticsPage from './screens/social/PostAnalyticsPage';
+import SocialInboxPage from './screens/social/SocialInboxPage';
+import HashtagResearchPage from './screens/social/HashtagResearchPage';
+import CompetitorTrackingPage from './screens/social/CompetitorTrackingPage';
 import { useEffect } from 'react';
 import { storage } from './lib/storage';
 import {
@@ -66,6 +74,14 @@ export default function App() {
             <Route path="/email-campaigns" element={<CampaignsPage />} />
             <Route path="/sequences" element={<SequencesPage />} />
             <Route path="/workflows" element={<WorkflowsPage />} />
+            <Route path="/social/accounts" element={<SocialAccountsPage />} />
+            <Route path="/social/calendar" element={<ContentCalendarPage />} />
+            <Route path="/social/compose" element={<PostComposerPage />} />
+            <Route path="/social/scheduled" element={<ScheduledPostsPage />} />
+            <Route path="/social/analytics" element={<PostAnalyticsPage />} />
+            <Route path="/social/inbox" element={<SocialInboxPage />} />
+            <Route path="/social/hashtags" element={<HashtagResearchPage />} />
+            <Route path="/social/competitors" element={<CompetitorTrackingPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
