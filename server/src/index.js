@@ -18,6 +18,10 @@ import hashtagsRouter from './routes/hashtags.js';
 import competitorsRouter from './routes/competitors.js';
 import { runSequenceAutomation } from './jobs/sequenceRunner.js';
 import { publishScheduledPosts } from './jobs/postPublisher.js';
+import aiGenerateRouter from './routes/aiGenerate.js';
+import contentLibraryRouter from './routes/contentLibrary.js';
+import brandVoiceRouter from './routes/brandVoice.js';
+import contentTemplatesRouter from './routes/contentTemplates.js';
 
 dotenv.config();
 
@@ -41,9 +45,13 @@ app.use('/api/social/posts', socialPostsRouter);
 app.use('/api/social/inbox', socialInboxRouter);
 app.use('/api/hashtags', hashtagsRouter);
 app.use('/api/competitors', competitorsRouter);
+app.use('/api/ai', aiGenerateRouter);
+app.use('/api/content/library', contentLibraryRouter);
+app.use('/api/brand-voice', brandVoiceRouter);
+app.use('/api/templates', contentTemplatesRouter);
 
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'adgorhythms', version: '2.0.0' });
+  res.json({ status: 'ok', service: 'adgorhythms', version: '3.0.0' });
 });
 
 // Sequence automation cron - daily at 9 AM UTC

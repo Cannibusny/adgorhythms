@@ -24,6 +24,10 @@ import PostAnalyticsPage from './screens/social/PostAnalyticsPage';
 import SocialInboxPage from './screens/social/SocialInboxPage';
 import HashtagResearchPage from './screens/social/HashtagResearchPage';
 import CompetitorTrackingPage from './screens/social/CompetitorTrackingPage';
+import AIGeneratorPage from './screens/ai/AIGeneratorPage';
+import ContentLibraryPage from './screens/ai/ContentLibraryPage';
+import BrandVoicePage from './screens/ai/BrandVoicePage';
+import ContentTemplatesPage from './screens/ai/ContentTemplatesPage';
 import { useEffect } from 'react';
 import { storage } from './lib/storage';
 import {
@@ -82,6 +86,10 @@ export default function App() {
             <Route path="/social/inbox" element={<SocialInboxPage />} />
             <Route path="/social/hashtags" element={<HashtagResearchPage />} />
             <Route path="/social/competitors" element={<CompetitorTrackingPage />} />
+            <Route path="/ai/generate" element={<AIGeneratorPage />} />
+            <Route path="/ai/library" element={<ContentLibraryPage />} />
+            <Route path="/ai/brand-voice" element={<BrandVoicePage />} />
+            <Route path="/ai/templates" element={<ContentTemplatesPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

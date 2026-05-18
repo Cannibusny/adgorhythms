@@ -21,6 +21,10 @@ import {
   Inbox,
   Hash,
   Eye,
+  Sparkles,
+  BookOpen,
+  MessageSquare,
+  FileTemplate,
 } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 
@@ -51,6 +55,13 @@ const socialItems = [
   { to: '/social/inbox', icon: Inbox, label: 'Social Inbox' },
   { to: '/social/hashtags', icon: Hash, label: 'Hashtag Research' },
   { to: '/social/competitors', icon: Eye, label: 'Competitors' },
+];
+
+const aiItems = [
+  { to: '/ai/generate', icon: Sparkles, label: 'AI Generator' },
+  { to: '/ai/library', icon: BookOpen, label: 'Content Library' },
+  { to: '/ai/brand-voice', icon: MessageSquare, label: 'Brand Voice' },
+  { to: '/ai/templates', icon: FileTemplate, label: 'Templates' },
 ];
 
 const CALENDLY_URL = 'https://calendly.com/mrsjw136/free-discovery-call-adgorhythms-meeting';
@@ -125,6 +136,23 @@ export default function Sidebar() {
         ))}
         <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Social Media</div>
         {socialItems.map(({ to, icon: Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                isActive
+                  ? 'bg-[#6C47FF] text-white shadow-lg shadow-[#6C47FF]/30'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`
+            }
+          >
+            <Icon size={18} />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+        <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">AI Content</div>
+        {aiItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
