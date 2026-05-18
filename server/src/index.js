@@ -41,6 +41,7 @@ import aiAdOptimizerRouter from './routes/aiAdOptimizer.js';
 import aiCallAnalyzerRouter from './routes/aiCallAnalyzer.js';
 import aiChurnPredictorRouter from './routes/aiChurnPredictor.js';
 import aiRoiCalculatorRouter from './routes/aiRoiCalculator.js';
+import reviewsRouter from './routes/reviews.js';
 
 dotenv.config();
 
@@ -87,6 +88,7 @@ app.use('/api/ai/ads', aiAdOptimizerRouter);
 app.use('/api/ai/calls', aiCallAnalyzerRouter);
 app.use('/api/ai/churn', aiChurnPredictorRouter);
 app.use('/api/ai/roi', aiRoiCalculatorRouter);
+app.use('/api/reviews', reviewsRouter);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'adgorhythms', version: '6.0.0' });

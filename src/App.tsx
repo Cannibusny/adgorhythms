@@ -52,6 +52,12 @@ import AdOptimizerPage from './screens/ai/AdOptimizerPage';
 import SalesCallAnalyzerPage from './screens/ai/SalesCallAnalyzerPage';
 import ChurnPredictorPage from './screens/ai/ChurnPredictorPage';
 import RoiDashboardPage from './screens/ai/RoiDashboardPage';
+import ReviewSetupPage from './screens/reviews/ReviewSetupPage';
+import ReviewDashboardPage from './screens/reviews/ReviewDashboardPage';
+import ReviewInboxPage from './screens/reviews/ReviewInboxPage';
+import RecoveryCampaignsPage from './screens/reviews/RecoveryCampaignsPage';
+import ReviewRequestsPage from './screens/reviews/ReviewRequestsPage';
+import ReputationReportPage from './screens/reviews/ReputationReportPage';
 import { useEffect } from 'react';
 import { storage } from './lib/storage';
 import {
@@ -138,6 +144,12 @@ export default function App() {
             <Route path="/ai/calls" element={<SalesCallAnalyzerPage />} />
             <Route path="/ai/churn" element={<ChurnPredictorPage />} />
             <Route path="/ai/roi" element={<RoiDashboardPage />} />
+            <Route path="/reviews/setup" element={<ReviewSetupPage />} />
+            <Route path="/reviews" element={<ReviewDashboardPage />} />
+            <Route path="/reviews/inbox" element={<ReviewInboxPage />} />
+            <Route path="/reviews/recovery" element={<RecoveryCampaignsPage />} />
+            <Route path="/reviews/requests" element={<ReviewRequestsPage />} />
+            <Route path="/reviews/report" element={<ReputationReportPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
