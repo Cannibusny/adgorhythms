@@ -11,7 +11,6 @@ import {
   Calendar,
   Copy,
   Target,
-  Mail,
   Zap,
   ListOrdered,
   BarChart3,
@@ -30,6 +29,10 @@ import {
   TrendingUp,
   PieChart,
   GitBranch,
+  Search,
+  Link2,
+  Shield,
+  CalendarDays,
 } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 
@@ -81,6 +84,19 @@ const analyticsItems = [
   { to: '/analytics/conversions', icon: PieChart, label: 'Conversions' },
   { to: '/analytics/attribution', icon: GitBranch, label: 'Attribution' },
   { to: '/analytics/revenue', icon: DollarSign, label: 'Revenue' },
+];
+
+const seoItems = [
+  { to: '/seo/keywords', icon: Search, label: 'Keyword Research' },
+  { to: '/seo/backlinks', icon: Link2, label: 'Backlinks' },
+  { to: '/seo/audit', icon: Shield, label: 'Site Audit' },
+  { to: '/seo/competitors', icon: Eye, label: 'SEO Competitors' },
+];
+
+const calendarItems = [
+  { to: '/calendar/settings', icon: Settings, label: 'Calendar Settings' },
+  { to: '/calendar/widget', icon: Calendar, label: 'Book Meeting' },
+  { to: '/calendar/bookings', icon: CalendarDays, label: 'Bookings' },
 ];
 
 const CALENDLY_URL = 'https://calendly.com/mrsjw136/free-discovery-call-adgorhythms-meeting';
@@ -206,6 +222,40 @@ export default function Sidebar() {
         ))}
         <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Analytics</div>
         {analyticsItems.map(({ to, icon: Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                isActive
+                  ? 'bg-[#6C47FF] text-white shadow-lg shadow-[#6C47FF]/30'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`
+            }
+          >
+            <Icon size={18} />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+        <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">SEO Tools</div>
+        {seoItems.map(({ to, icon: Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                isActive
+                  ? 'bg-[#6C47FF] text-white shadow-lg shadow-[#6C47FF]/30'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`
+            }
+          >
+            <Icon size={18} />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+        <div className="px-3 pb-1 pt-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Scheduling</div>
+        {calendarItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}

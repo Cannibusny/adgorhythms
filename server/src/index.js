@@ -27,6 +27,12 @@ import emailSubscribersRouter from './routes/emailSubscribers.js';
 import emailTemplatesRouter from './routes/emailTemplates.js';
 import emailTrackingRouter from './routes/emailTracking.js';
 import analyticsRouter from './routes/analytics.js';
+import seoKeywordsRouter from './routes/seoKeywords.js';
+import seoBacklinksRouter from './routes/seoBacklinks.js';
+import seoAuditRouter from './routes/seoAudit.js';
+import calendarTypesRouter from './routes/calendarTypes.js';
+import calendarAvailabilityRouter from './routes/calendarAvailability.js';
+import calendarBookingsRouter from './routes/calendarBookings.js';
 
 dotenv.config();
 
@@ -59,9 +65,15 @@ app.use('/api/email/subscribers', emailSubscribersRouter);
 app.use('/api/email/templates', emailTemplatesRouter);
 app.use('/api/email', emailTrackingRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/seo/keywords', seoKeywordsRouter);
+app.use('/api/seo/backlinks', seoBacklinksRouter);
+app.use('/api/seo/audits', seoAuditRouter);
+app.use('/api/calendar/types', calendarTypesRouter);
+app.use('/api/calendar/availability', calendarAvailabilityRouter);
+app.use('/api/calendar/bookings', calendarBookingsRouter);
 
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'adgorhythms', version: '4.0.0' });
+  res.json({ status: 'ok', service: 'adgorhythms', version: '5.0.0' });
 });
 
 // Sequence automation cron - daily at 9 AM UTC

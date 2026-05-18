@@ -36,6 +36,14 @@ import TrafficAnalyticsPage from './screens/analytics/TrafficAnalyticsPage';
 import ConversionAnalyticsPage from './screens/analytics/ConversionAnalyticsPage';
 import AttributionReportPage from './screens/analytics/AttributionReportPage';
 import RevenueAnalyticsPage from './screens/analytics/RevenueAnalyticsPage';
+import KeywordResearchPage from './screens/seo/KeywordResearchPage';
+import BacklinkAnalysisPage from './screens/seo/BacklinkAnalysisPage';
+import SiteAuditPage from './screens/seo/SiteAuditPage';
+import SeoCompetitorPage from './screens/seo/SeoCompetitorPage';
+import CalendarSettingsPage from './screens/calendar/CalendarSettingsPage';
+import BookingWidgetPage from './screens/calendar/BookingWidgetPage';
+import BookingsCalendarPage from './screens/calendar/BookingsCalendarPage';
+import PublicBookingPage from './screens/calendar/PublicBookingPage';
 import { useEffect } from 'react';
 import { storage } from './lib/storage';
 import {
@@ -106,6 +114,14 @@ export default function App() {
             <Route path="/analytics/conversions" element={<ConversionAnalyticsPage />} />
             <Route path="/analytics/attribution" element={<AttributionReportPage />} />
             <Route path="/analytics/revenue" element={<RevenueAnalyticsPage />} />
+            <Route path="/seo/keywords" element={<KeywordResearchPage />} />
+            <Route path="/seo/backlinks" element={<BacklinkAnalysisPage />} />
+            <Route path="/seo/audit" element={<SiteAuditPage />} />
+            <Route path="/seo/competitors" element={<SeoCompetitorPage />} />
+            <Route path="/calendar/settings" element={<CalendarSettingsPage />} />
+            <Route path="/calendar/widget" element={<BookingWidgetPage />} />
+            <Route path="/calendar/bookings" element={<BookingsCalendarPage />} />
+            <Route path="/book/:workspaceId/:calendarTypeId" element={<PublicBookingPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
