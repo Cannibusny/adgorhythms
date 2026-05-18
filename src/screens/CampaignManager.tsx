@@ -6,6 +6,8 @@ import {
 import { storage, generateId } from '../lib/storage';
 import { useToast } from '../hooks/useToast';
 import { PACKAGES } from '../data/sampleData';
+import JsonLd from '../components/JsonLd';
+import { buildCampaignSchemas } from '../utils/schemaMarkup';
 import type { Client, Campaign, Deliverable, DeliverableStatus, PackageTier } from '../types';
 
 const STATUS_ICONS: Record<DeliverableStatus, React.ReactNode> = {
@@ -264,8 +266,13 @@ export default function CampaignManager() {
     );
   }
 
+  const campaignSchemas = activeCampaign && selectedClient
+    ? buildCampaignSchemas(activeCampaign, selectedClient)
+    : [];
+
   return (
     <div className="p-8 space-y-8 animate-fade-in">
+      {campaignSchemas.length > 0 && <JsonLd schema={campaignSchemas} />}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-black text-[#1A1A2E] tracking-tight">Campaign Manager</h1>
