@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { storage, generateId } from '../lib/storage';
 import { useToast } from '../hooks/useToast';
+import JsonLd from '../components/JsonLd';
+import { buildAgencySchema, buildOrganizationSchema } from '../utils/schemaMarkup';
 import type { Client, Activity, Task } from '../types';
 
 const STAGE_LABELS: Record<string, string> = {
@@ -116,8 +118,12 @@ export default function Dashboard() {
     return 'good';
   };
 
+  const agencySchema = buildAgencySchema(agency ?? { name: 'ADgorhythms' } as any);
+  const clientSchemas = activeClients.map(buildOrganizationSchema);
+
   return (
     <div className="p-8 space-y-8 animate-fade-in">
+      <JsonLd schema={[agencySchema, ...clientSchemas]} />
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-black text-[#1A1A2E] tracking-tight">

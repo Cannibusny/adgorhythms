@@ -1,0 +1,31 @@
+import { useEffect, useRef } from 'react';
+
+interface JsonLdProps {
+  schema: Record<string, unknown> | Record<string, unknown>[];
+}
+
+export default function JsonLd({ schema }: JsonLdProps) {
+  const nodesRef = useRef<HTMLScriptElement[]>([]);
+
+  useEffect(() => {
+    nodesRef.current.forEach((el) => el.remove());
+    nodesRef.current = [];
+
+    const schemas = Array.isArray(schema) ? schema : [schema];
+
+    schemas.forEach((s) => {
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify(s, null, 2);
+      document.head.appendChild(script);
+      nodesRef.current.push(script);
+    });
+
+    return () => {
+      nodesRef.current.forEach((el) => el.remove());
+      nodesRef.current = [];
+    };
+  }, [schema]);
+
+  return null;
+}
