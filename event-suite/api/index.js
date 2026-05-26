@@ -30,6 +30,30 @@ app.set('views', path.join(__dirname, '..', 'src', 'views'));
 // Middleware
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
+
+// Stripe webhook MUST be before express.json() to preserve raw body for signature verification
+app.post('/webhook/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return res.status(400).send('Stripe not configured');
+  }
+  const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+  const sig = req.headers['stripe-signature'];
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    if (session.payment_status === 'paid') {
+      console.log('Stripe webhook confirmed payment:', session.id);
+    }
+  }
+  res.json({ received: true });
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -56,6 +80,12 @@ app.use('/settings/klaviyo', klaviyoRoutes);
 app.use('/api', statusRoutes);
 app.use('/events', eventRoutes);
 app.use('/checkin', checkinRoutes);
+
+// Support /auth/meta/callback redirect
+app.get('/auth/meta/callback', (req, res) => {
+  const qs = new URLSearchParams(req.query).toString();
+  res.redirect(`/oauth/meta/callback${qs ? '?' + qs : ''}`);
+});
 
 // Static files for PWA
 app.use(express.static(path.join(__dirname, '..', 'src', 'public')));
@@ -165,6 +195,39 @@ module.exports = async (req, res) => {
           checked_in_by UUID REFERENCES promoters(id),
           checked_in_at TIMESTAMP DEFAULT NOW()
         );
+
+        CREATE TABLE IF NOT EXISTS ticket_tiers (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+          name VARCHAR(100) NOT NULL,
+          price DECIMAL(10,2) NOT NULL DEFAULT 0,
+          quantity INTEGER NOT NULL DEFAULT 0,
+          description TEXT DEFAULT '',
+          sort_order INTEGER DEFAULT 0,
+          created_at TIMESTAMP DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_ticket_tiers_event ON ticket_tiers (event_id);
+
+        CREATE TABLE IF NOT EXISTS promo_codes (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+          code VARCHAR(50) NOT NULL,
+          discount_type VARCHAR(20) NOT NULL DEFAULT 'percentage',
+          discount_value DECIMAL(10,2) NOT NULL DEFAULT 0,
+          max_uses INTEGER DEFAULT NULL,
+          times_used INTEGER DEFAULT 0,
+          active BOOLEAN DEFAULT true,
+          created_at TIMESTAMP DEFAULT NOW(),
+          UNIQUE(event_id, code)
+        );
+        CREATE INDEX IF NOT EXISTS idx_promo_codes_event ON promo_codes (event_id);
+        CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes (code);
+
+        DO $$ BEGIN ALTER TABLE tickets ADD COLUMN tier_name VARCHAR(100) DEFAULT 'General'; EXCEPTION WHEN duplicate_column THEN NULL; END $$;
+        DO $$ BEGIN ALTER TABLE tickets ADD COLUMN stripe_session_id VARCHAR(255); EXCEPTION WHEN duplicate_column THEN NULL; END $$;
+        DO $$ BEGIN ALTER TABLE tickets ADD COLUMN stripe_payment_intent VARCHAR(255); EXCEPTION WHEN duplicate_column THEN NULL; END $$;
+        DO $$ BEGIN ALTER TABLE tickets ADD COLUMN promo_code VARCHAR(50); EXCEPTION WHEN duplicate_column THEN NULL; END $$;
+        DO $$ BEGIN ALTER TABLE tickets ADD COLUMN discount_amount DECIMAL(10,2) DEFAULT 0; EXCEPTION WHEN duplicate_column THEN NULL; END $$;
 
         CREATE TABLE IF NOT EXISTS contacts (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

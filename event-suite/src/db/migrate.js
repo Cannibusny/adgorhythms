@@ -31,12 +31,9 @@ CREATE TABLE IF NOT EXISTS credentials (
   UNIQUE(promoter_id, platform)
 );
 
--- Index for token refresh queries
 CREATE INDEX IF NOT EXISTS idx_credentials_expiry
   ON credentials (token_expires_at)
   WHERE status = 'active';
-
--- Index for promoter lookups
 CREATE INDEX IF NOT EXISTS idx_credentials_promoter
   ON credentials (promoter_id);
 
@@ -86,6 +83,57 @@ CREATE TABLE IF NOT EXISTS check_ins (
   checked_in_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Ticket tiers
+CREATE TABLE IF NOT EXISTS ticket_tiers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+  name VARCHAR(100) NOT NULL,
+  price DECIMAL(10,2) NOT NULL DEFAULT 0,
+  quantity INTEGER NOT NULL DEFAULT 0,
+  description TEXT DEFAULT '',
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_ticket_tiers_event ON ticket_tiers (event_id);
+
+-- Promo codes
+CREATE TABLE IF NOT EXISTS promo_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+  code VARCHAR(50) NOT NULL,
+  discount_type VARCHAR(20) NOT NULL DEFAULT 'percentage',
+  discount_value DECIMAL(10,2) NOT NULL DEFAULT 0,
+  max_uses INTEGER DEFAULT NULL,
+  times_used INTEGER DEFAULT 0,
+  active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(event_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_promo_codes_event ON promo_codes (event_id);
+CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes (code);
+
+-- Add new columns to tickets (idempotent via IF NOT EXISTS pattern)
+DO $$ BEGIN
+  ALTER TABLE tickets ADD COLUMN tier_name VARCHAR(100) DEFAULT 'General';
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE tickets ADD COLUMN stripe_session_id VARCHAR(255);
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE tickets ADD COLUMN stripe_payment_intent VARCHAR(255);
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE tickets ADD COLUMN promo_code VARCHAR(50);
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE tickets ADD COLUMN discount_amount DECIMAL(10,2) DEFAULT 0;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
 -- Updated-at trigger
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
@@ -114,6 +162,72 @@ BEGIN
   END IF;
 END;
 $$;
+
+-- Check-In System tables
+CREATE TABLE IF NOT EXISTS contacts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  promoter_id UUID REFERENCES promoters(id) ON DELETE CASCADE,
+  email VARCHAR(255) NOT NULL,
+  name VARCHAR(255),
+  phone VARCHAR(50),
+  source VARCHAR(100) DEFAULT 'manual',
+  city VARCHAR(100),
+  region VARCHAR(100),
+  tags TEXT DEFAULT '',
+  total_events_attended INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(email, promoter_id)
+);
+CREATE INDEX IF NOT EXISTS idx_contacts_promoter ON contacts (promoter_id);
+CREATE INDEX IF NOT EXISTS idx_contacts_email ON contacts (email);
+
+CREATE TABLE IF NOT EXISTS checkin_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  promoter_id UUID REFERENCES promoters(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  description TEXT DEFAULT '',
+  event_date TIMESTAMP NOT NULL,
+  location VARCHAR(500) NOT NULL,
+  city VARCHAR(100) DEFAULT '',
+  region VARCHAR(100) DEFAULT 'NYC',
+  currency VARCHAR(10) DEFAULT 'USD',
+  status VARCHAR(20) DEFAULT 'active',
+  followup_sent_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_checkin_events_promoter ON checkin_events (promoter_id);
+
+CREATE TABLE IF NOT EXISTS attendees (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  checkin_event_id UUID REFERENCES checkin_events(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) DEFAULT '',
+  phone VARCHAR(50) DEFAULT '',
+  table_type VARCHAR(50) DEFAULT 'General',
+  table_size INTEGER DEFAULT 1,
+  amount_paid DECIMAL(10,2) DEFAULT 0,
+  ticket_code VARCHAR(64) UNIQUE NOT NULL,
+  qr_code TEXT,
+  source VARCHAR(100) DEFAULT 'manual',
+  sale_location VARCHAR(255) DEFAULT '',
+  checked_in BOOLEAN DEFAULT false,
+  checked_in_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_attendees_event ON attendees (checkin_event_id);
+CREATE INDEX IF NOT EXISTS idx_attendees_code ON attendees (ticket_code);
+CREATE INDEX IF NOT EXISTS idx_attendees_name ON attendees (LOWER(name));
+
+CREATE TABLE IF NOT EXISTS checkin_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  attendee_id UUID REFERENCES attendees(id) ON DELETE CASCADE,
+  checkin_event_id UUID REFERENCES checkin_events(id) ON DELETE CASCADE,
+  checked_in_by UUID REFERENCES promoters(id),
+  checked_in_at TIMESTAMP DEFAULT NOW()
+);
 `;
 
 async function migrate() {
