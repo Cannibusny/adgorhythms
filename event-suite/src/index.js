@@ -68,6 +68,17 @@ app.use('/api', statusRoutes);
 app.use('/events', eventRoutes);
 app.use('/checkin', checkinRoutes);
 
+// Support /auth/meta/callback redirect (maps to /oauth/meta/callback)
+app.get('/auth/meta/callback', (req, res) => {
+  const qs = new URLSearchParams(req.query).toString();
+  res.redirect(`/oauth/meta/callback${qs ? '?' + qs : ''}`);
+});
+
+// Stripe webhook (raw body required)
+app.post('/webhook/stripe', express.raw({ type: 'application/json' }), (req, res) => {
+  eventRoutes.handle(req, res, () => res.status(404).send('Not found'));
+});
+
 // Root redirect
 app.get('/', (_req, res) => {
   res.redirect('/dashboard');
@@ -170,7 +181,43 @@ async function runMigration() {
       checked_in_at TIMESTAMP DEFAULT NOW()
     );
 
-    -- Check-In System tables (scalable multi-event architecture)
+    -- Ticket tiers
+    CREATE TABLE IF NOT EXISTS ticket_tiers (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+      name VARCHAR(100) NOT NULL,
+      price DECIMAL(10,2) NOT NULL DEFAULT 0,
+      quantity INTEGER NOT NULL DEFAULT 0,
+      description TEXT DEFAULT '',
+      sort_order INTEGER DEFAULT 0,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_ticket_tiers_event ON ticket_tiers (event_id);
+
+    -- Promo codes
+    CREATE TABLE IF NOT EXISTS promo_codes (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+      code VARCHAR(50) NOT NULL,
+      discount_type VARCHAR(20) NOT NULL DEFAULT 'percentage',
+      discount_value DECIMAL(10,2) NOT NULL DEFAULT 0,
+      max_uses INTEGER DEFAULT NULL,
+      times_used INTEGER DEFAULT 0,
+      active BOOLEAN DEFAULT true,
+      created_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE(event_id, code)
+    );
+    CREATE INDEX IF NOT EXISTS idx_promo_codes_event ON promo_codes (event_id);
+    CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes (code);
+
+    -- Add new columns to tickets
+    DO $$ BEGIN ALTER TABLE tickets ADD COLUMN tier_name VARCHAR(100) DEFAULT 'General'; EXCEPTION WHEN duplicate_column THEN NULL; END $$;
+    DO $$ BEGIN ALTER TABLE tickets ADD COLUMN stripe_session_id VARCHAR(255); EXCEPTION WHEN duplicate_column THEN NULL; END $$;
+    DO $$ BEGIN ALTER TABLE tickets ADD COLUMN stripe_payment_intent VARCHAR(255); EXCEPTION WHEN duplicate_column THEN NULL; END $$;
+    DO $$ BEGIN ALTER TABLE tickets ADD COLUMN promo_code VARCHAR(50); EXCEPTION WHEN duplicate_column THEN NULL; END $$;
+    DO $$ BEGIN ALTER TABLE tickets ADD COLUMN discount_amount DECIMAL(10,2) DEFAULT 0; EXCEPTION WHEN duplicate_column THEN NULL; END $$;
+
+    -- Check-In System tables
     CREATE TABLE IF NOT EXISTS contacts (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       promoter_id UUID REFERENCES promoters(id) ON DELETE CASCADE,

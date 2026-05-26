@@ -1,60 +1,67 @@
-<% var title = 'Your Ticket — ' + ticket.event_name; %>
-<%- include('layout', { body: `
-  <div style="text-align: center; margin-bottom: 2rem;">
-    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎟️</div>
-    <h1>You're In!</h1>
-    <h2>Your ticket for ${ticket.event_name} is confirmed</h2>
+<%- include('layout-start', { title: 'Your Ticket — ' + ticket.event_name, promoter: promoter }) %>
+
+<div style="text-align: center; margin-bottom: 2rem;">
+  <div style="font-size: 3rem; margin-bottom: 0.5rem;">&#127915;</div>
+  <h1>You're In!</h1>
+  <h2>Your ticket for <%= ticket.event_name %> is confirmed</h2>
+</div>
+
+<div class="card" style="padding: 2rem; text-align: center;">
+  <div style="margin-bottom: 1.5rem;">
+    <img src="<%= ticket.qr_code %>" alt="QR Code Ticket" style="max-width: 250px; border-radius: 12px; background: #fff; padding: 8px;" />
   </div>
 
-  <div class="card" style="padding: 2rem; text-align: center;">
-    <div style="margin-bottom: 1.5rem;">
-      <img src="${ticket.qr_code}" alt="QR Code Ticket" style="max-width: 250px; border-radius: 12px; background: #fff; padding: 8px;" />
-    </div>
+  <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Ticket Code</div>
+  <div style="font-family: monospace; font-size: 1.1rem; margin-bottom: 0.75rem; word-break: break-all;">
+    <%= ticket.ticket_code %>
+  </div>
 
-    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Ticket Code</div>
-    <div style="font-family: monospace; font-size: 1.1rem; margin-bottom: 1.5rem; word-break: break-all;">
-      ${ticket.ticket_code}
-    </div>
+  <% if (ticket.tier_name && ticket.tier_name !== 'General') { %>
+  <div style="margin-bottom: 1rem;">
+    <span style="background: rgba(108,92,231,0.15); color: var(--accent); padding: 0.3rem 1rem; border-radius: 9999px; font-size: 0.9rem; font-weight: 600;"><%= ticket.tier_name %></span>
+  </div>
+  <% } %>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: left; margin-bottom: 1.5rem;">
-      <div>
-        <div style="font-size: 0.8rem; color: var(--text-muted);">Event</div>
-        <div style="font-weight: 600;">${ticket.event_name}</div>
-      </div>
-      <div>
-        <div style="font-size: 0.8rem; color: var(--text-muted);">Date & Time</div>
-        <div style="font-weight: 600;">
-          ${new Date(ticket.event_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-          at ${new Date(ticket.event_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-        </div>
-      </div>
-      <div>
-        <div style="font-size: 0.8rem; color: var(--text-muted);">Location</div>
-        <div style="font-weight: 600;">${ticket.location}</div>
-      </div>
-      <div>
-        <div style="font-size: 0.8rem; color: var(--text-muted);">Name</div>
-        <div style="font-weight: 600;">${ticket.buyer_name}</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: left; margin-bottom: 1.5rem;">
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-muted);">Event</div>
+      <div style="font-weight: 600;"><%= ticket.event_name %></div>
+    </div>
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-muted);">Date & Time</div>
+      <div style="font-weight: 600;">
+        <%= new Date(ticket.event_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) %>
+        at <%= new Date(ticket.event_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %>
       </div>
     </div>
-
-    <div style="padding: 1rem; background: var(--surface-2); border-radius: 8px; font-size: 0.85rem; color: var(--text-muted);">
-      Show this QR code at the door. Screenshot this page for safekeeping.
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-muted);">Location</div>
+      <div style="font-weight: 600;"><%= ticket.location %></div>
+    </div>
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-muted);">Name</div>
+      <div style="font-weight: 600;"><%= ticket.buyer_name %></div>
     </div>
   </div>
 
-  <div style="text-align: center; margin-top: 1.5rem;">
-    <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ticket.event_name)}&dates=${new Date(ticket.event_date).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'}/${new Date(new Date(ticket.event_date).getTime() + 3600000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'}&location=${encodeURIComponent(ticket.location)}" target="_blank" class="btn btn-primary" style="background: transparent; border: 1px solid var(--accent); color: var(--accent);">
-      Add to Calendar
-    </a>
+  <div style="padding: 1rem; background: var(--surface-2); border-radius: 8px; font-size: 0.85rem; color: var(--text-muted);">
+    Show this QR code at the door. Screenshot this page for safekeeping.
   </div>
+</div>
 
-  <div style="text-align: center; margin-top: 1.5rem;">
-    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Share with friends</div>
-    <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
-      <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent((typeof process !== 'undefined' && process.env && process.env.BASE_URL ? process.env.BASE_URL : '') + '/events/' + ticket.event_id)}" target="_blank" class="btn btn-sm" style="background: #1877F2; color: #fff;">Facebook</a>
-      <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent('Just got my ticket for ' + ticket.event_name + '!')}&url=${encodeURIComponent((typeof process !== 'undefined' && process.env && process.env.BASE_URL ? process.env.BASE_URL : '') + '/events/' + ticket.event_id)}" target="_blank" class="btn btn-sm" style="background: #1DA1F2; color: #fff;">Twitter</a>
-      <a href="https://www.instagram.com/" target="_blank" class="btn btn-sm" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff;">Instagram</a>
-    </div>
+<div style="text-align: center; margin-top: 1.5rem;">
+  <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=<%= encodeURIComponent(ticket.event_name) %>&dates=<%= new Date(ticket.event_date).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z' %>/<%= new Date(new Date(ticket.event_date).getTime() + 3600000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z' %>&location=<%= encodeURIComponent(ticket.location) %>" target="_blank" class="btn btn-primary" style="background: transparent; border: 1px solid var(--accent); color: var(--accent);">
+    Add to Calendar
+  </a>
+</div>
+
+<div style="text-align: center; margin-top: 1.5rem;">
+  <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Share with friends</div>
+  <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+    <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent((typeof process !== 'undefined' && process.env && process.env.BASE_URL ? process.env.BASE_URL : '') + '/events/' + ticket.event_id) %>" target="_blank" class="btn btn-sm" style="background: #1877F2; color: #fff;">Facebook</a>
+    <a href="https://twitter.com/intent/tweet?text=<%= encodeURIComponent('Just got my ticket for ' + ticket.event_name + '!') %>&url=<%= encodeURIComponent((typeof process !== 'undefined' && process.env && process.env.BASE_URL ? process.env.BASE_URL : '') + '/events/' + ticket.event_id) %>" target="_blank" class="btn btn-sm" style="background: #1DA1F2; color: #fff;">Twitter</a>
+    <a href="https://www.instagram.com/" target="_blank" class="btn btn-sm" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff;">Instagram</a>
   </div>
-` }) %>
+</div>
+
+<%- include('layout-end', { registerSW: false }) %>

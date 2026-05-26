@@ -1,75 +1,226 @@
-<% var title = event.name + ' — ADgorhythms Event Suite'; %>
-<%- include('layout', { body: `
-  ${typeof flash !== 'undefined' && flash && flash.error ? '<div class="flash flash-error">' + flash.error + '</div>' : ''}
-  ${typeof flash !== 'undefined' && flash && flash.success ? '<div class="flash flash-success">' + flash.success + '</div>' : ''}
+<%- include('layout-start', { title: event.name + ' — ADgorhythms Event Suite', promoter: promoter }) %>
 
-  <div style="margin-bottom: 2rem;">
-    <h1>${event.name}</h1>
-    <h2>Hosted by ${event.business_name || event.promoter_name || 'ADgorhythms'}</h2>
-  </div>
+<% if (typeof flash !== 'undefined' && flash && flash.error) { %>
+  <div class="flash flash-error"><%= flash.error %></div>
+<% } %>
+<% if (typeof flash !== 'undefined' && flash && flash.success) { %>
+  <div class="flash flash-success"><%= flash.success %></div>
+<% } %>
 
-  <div class="card" style="padding: 2rem;">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-      <div>
-        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">Date & Time</div>
-        <div style="font-size: 1.1rem; font-weight: 600;">
-          ${new Date(event.event_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-          at ${new Date(event.event_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-        </div>
-      </div>
-      <div>
-        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">Location</div>
-        <div style="font-size: 1.1rem; font-weight: 600;">${event.location}</div>
+<div style="margin-bottom: 2rem; text-align: center;">
+  <h1><%= event.name %></h1>
+  <h2>Hosted by <%= event.business_name || event.promoter_name || 'ADgorhythms' %></h2>
+</div>
+
+<div class="card" style="padding: 2rem;">
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+    <div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">Date & Time</div>
+      <div style="font-size: 1.1rem; font-weight: 600;">
+        <%= new Date(event.event_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) %>
+        at <%= new Date(event.event_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %>
       </div>
     </div>
+    <div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">Location</div>
+      <div style="font-size: 1.1rem; font-weight: 600;"><%= event.location %></div>
+    </div>
+  </div>
 
-    ${event.description ? '<div style="margin-bottom: 1.5rem; color: var(--text-muted); line-height: 1.6;">' + event.description + '</div>' : ''}
+  <% if (event.description) { %>
+    <div style="margin-bottom: 1.5rem; color: var(--text-muted); line-height: 1.6;"><%- event.description %></div>
+  <% } %>
 
-    <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem;">
+  <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+    <% if (tiers.length === 0) { %>
       <div>
-        <div style="font-size: 2rem; font-weight: 700; color: var(--accent);">$${parseFloat(event.ticket_price).toFixed(2)}</div>
+        <div style="font-size: 2rem; font-weight: 700; color: var(--accent);">$<%= parseFloat(event.ticket_price).toFixed(2) %></div>
         <div style="font-size: 0.85rem; color: var(--text-muted);">per ticket</div>
       </div>
-      <div>
-        <div style="font-size: 2rem; font-weight: 700; color: ${ticketsRemaining > 0 ? 'var(--success)' : 'var(--error)'};">${ticketsRemaining}</div>
-        <div style="font-size: 0.85rem; color: var(--text-muted);">tickets remaining</div>
+    <% } %>
+    <div>
+      <div style="font-size: 2rem; font-weight: 700; color: <%= ticketsRemaining > 0 ? 'var(--success)' : 'var(--error)' %>;"><%= ticketsRemaining %></div>
+      <div style="font-size: 0.85rem; color: var(--text-muted);">tickets remaining</div>
+    </div>
+  </div>
+</div>
+
+<% if (tiers.length > 0) { %>
+<div class="card" style="padding: 2rem; margin-top: 1rem;">
+  <h3 style="margin-bottom: 1rem;">Ticket Tiers</h3>
+  <div style="display: grid; gap: 1rem;">
+    <% tiers.forEach(function(tier) { %>
+      <div style="border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; transition: border-color 0.2s;"
+           <% if (tier.name === 'VIP') { %> style="border: 1px solid var(--gold); border-radius: 10px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;" <% } %>>
+        <div>
+          <div style="font-weight: 700; font-size: 1.1rem; color: <%= tier.name === 'VIP' ? 'var(--gold)' : tier.name === 'Student' ? 'var(--success)' : 'var(--text)' %>;">
+            <%= tier.name %>
+          </div>
+          <% if (tier.description) { %>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;"><%= tier.description %></div>
+          <% } %>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;"><%= tier.remaining %> of <%= tier.quantity %> remaining</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">$<%= parseFloat(tier.price).toFixed(2) %></div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+</div>
+<% } %>
+
+<% if (ticketsRemaining > 0) { %>
+<div class="card" style="padding: 2rem; margin-top: 1rem;">
+  <h3 style="margin-bottom: 1rem;">Buy Tickets</h3>
+  <form method="POST" action="/events/<%= event.id %>/checkout" id="ticketForm">
+    <label for="buyerName">Your Name *</label>
+    <input type="text" name="buyerName" id="buyerName" placeholder="Your full name" required />
+
+    <label for="buyerEmail">Email *</label>
+    <input type="email" name="buyerEmail" id="buyerEmail" placeholder="you@example.com" required />
+
+    <label for="buyerPhone">Phone (for SMS confirmation)</label>
+    <input type="tel" name="buyerPhone" id="buyerPhone" placeholder="+15551234567" />
+
+    <% if (tiers.length > 0) { %>
+      <label for="tierName">Ticket Type</label>
+      <select name="tierName" id="tierName" onchange="updatePrice()">
+        <% tiers.forEach(function(tier) { %>
+          <option value="<%= tier.name %>" data-price="<%= tier.price %>" <%= tier.remaining <= 0 ? 'disabled' : '' %>>
+            <%= tier.name %> — $<%= parseFloat(tier.price).toFixed(2) %> <%= tier.remaining <= 0 ? '(Sold Out)' : '' %>
+          </option>
+        <% }); %>
+      </select>
+    <% } %>
+
+    <label for="quantity">Quantity</label>
+    <select name="quantity" id="quantity" onchange="updatePrice()">
+      <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+    </select>
+
+    <label for="promoCode">Promo Code (optional)</label>
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+      <input type="text" name="promoCode" id="promoCode" placeholder="Enter promo code" style="margin-bottom: 0; flex: 1;" />
+      <button type="button" class="btn btn-primary btn-sm" onclick="validatePromo()" style="white-space: nowrap;">Apply</button>
+    </div>
+    <div id="promoResult" style="font-size: 0.85rem; margin-bottom: 1rem; display: none;"></div>
+
+    <div id="priceBreakdown" style="background: var(--surface-2); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+        <span style="color: var(--text-muted);">Subtotal</span>
+        <span id="subtotalDisplay" style="font-weight: 600;">$0.00</span>
+      </div>
+      <div id="discountRow" style="display: none; justify-content: space-between; margin-bottom: 0.5rem;">
+        <span style="color: var(--success);">Discount</span>
+        <span id="discountDisplay" style="color: var(--success); font-weight: 600;">-$0.00</span>
+      </div>
+      <hr style="border: none; border-top: 1px solid var(--border); margin: 0.5rem 0;" />
+      <div style="display: flex; justify-content: space-between;">
+        <span style="font-weight: 700;">Total</span>
+        <span id="totalDisplay" style="font-weight: 700; color: var(--accent); font-size: 1.25rem;">$0.00</span>
       </div>
     </div>
-  </div>
 
-  ${ticketsRemaining > 0 ?
-    '<div class="card" style="padding: 2rem; margin-top: 1rem;">' +
-    '<h3 style="margin-bottom: 1rem;">Buy Tickets</h3>' +
-    '<form method="POST" action="/events/' + event.id + '/checkout">' +
-      '<label for="buyerName">Your Name *</label>' +
-      '<input type="text" name="buyerName" id="buyerName" placeholder="Your full name" required />' +
-      '<label for="buyerEmail">Email *</label>' +
-      '<input type="email" name="buyerEmail" id="buyerEmail" placeholder="you@example.com" required />' +
-      '<label for="buyerPhone">Phone (for SMS confirmation)</label>' +
-      '<input type="tel" name="buyerPhone" id="buyerPhone" placeholder="+15551234567" />' +
-      '<label for="quantity">Quantity</label>' +
-      '<select name="quantity" id="quantity" style="width: 100%; padding: 0.65rem 1rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.95rem; margin-bottom: 1rem;">' +
-        '<option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>' +
-      '</select>' +
-      '<button type="submit" class="btn btn-primary" style="width: 100%;">' +
-        'Buy Tickets — $' + parseFloat(event.ticket_price).toFixed(2) + ' each' +
-      '</button>' +
-    '</form>' +
-    '</div>'
-  : '<div class="card" style="padding: 2rem; text-align: center;"><h3 style="color: var(--error);">Sold Out</h3></div>'}
+    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;" id="buyBtn">
+      Buy Tickets
+    </button>
+  </form>
+</div>
+<% } else { %>
+<div class="card" style="padding: 2rem; text-align: center; margin-top: 1rem;">
+  <h3 style="color: var(--error);">Sold Out</h3>
+</div>
+<% } %>
 
-  <div style="text-align: center; margin-top: 1.5rem;">
-    <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.name)}&dates=${new Date(event.event_date).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'}/${new Date(new Date(event.event_date).getTime() + 3600000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'}&location=${encodeURIComponent(event.location)}&details=${encodeURIComponent(event.description || '')}" target="_blank" class="btn btn-primary" style="background: transparent; border: 1px solid var(--accent); color: var(--accent);">
-      Add to Calendar
-    </a>
-  </div>
+<div style="text-align: center; margin-top: 1.5rem;">
+  <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=<%= encodeURIComponent(event.name) %>&dates=<%= new Date(event.event_date).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z' %>/<%= new Date(new Date(event.event_date).getTime() + 3600000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z' %>&location=<%= encodeURIComponent(event.location) %>&details=<%= encodeURIComponent(event.description || '') %>" target="_blank" class="btn btn-primary" style="background: transparent; border: 1px solid var(--accent); color: var(--accent);">
+    Add to Calendar
+  </a>
+</div>
 
-  <div style="text-align: center; margin-top: 1.5rem;">
-    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Share this event</div>
-    <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
-      <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent((typeof process !== 'undefined' && process.env && process.env.BASE_URL ? process.env.BASE_URL : '') + '/events/' + event.id)}" target="_blank" class="btn btn-sm" style="background: #1877F2; color: #fff;">Facebook</a>
-      <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(event.name + ' — Get your tickets now!')}&url=${encodeURIComponent((typeof process !== 'undefined' && process.env && process.env.BASE_URL ? process.env.BASE_URL : '') + '/events/' + event.id)}" target="_blank" class="btn btn-sm" style="background: #1DA1F2; color: #fff;">Twitter</a>
-      <a href="https://www.instagram.com/" target="_blank" class="btn btn-sm" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff;">Instagram</a>
-    </div>
+<div style="text-align: center; margin-top: 1.5rem;">
+  <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Share this event</div>
+  <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+    <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent((typeof process !== 'undefined' && process.env && process.env.BASE_URL ? process.env.BASE_URL : '') + '/events/' + event.id) %>" target="_blank" class="btn btn-sm" style="background: #1877F2; color: #fff;">Facebook</a>
+    <a href="https://twitter.com/intent/tweet?text=<%= encodeURIComponent(event.name + ' — Get your tickets now!') %>&url=<%= encodeURIComponent((typeof process !== 'undefined' && process.env && process.env.BASE_URL ? process.env.BASE_URL : '') + '/events/' + event.id) %>" target="_blank" class="btn btn-sm" style="background: #1DA1F2; color: #fff;">Twitter</a>
+    <a href="https://www.instagram.com/" target="_blank" class="btn btn-sm" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff;">Instagram</a>
   </div>
-` }) %>
+</div>
+
+<script>
+var eventPrice = <%= parseFloat(event.ticket_price) %>;
+var currentDiscount = { type: null, value: 0 };
+
+function getUnitPrice() {
+  var tierSelect = document.getElementById('tierName');
+  if (tierSelect) {
+    var opt = tierSelect.options[tierSelect.selectedIndex];
+    return parseFloat(opt.getAttribute('data-price')) || eventPrice;
+  }
+  return eventPrice;
+}
+
+function updatePrice() {
+  var unitPrice = getUnitPrice();
+  var qty = parseInt(document.getElementById('quantity').value) || 1;
+  var subtotal = unitPrice * qty;
+
+  var discountPerUnit = 0;
+  if (currentDiscount.type === 'percentage') {
+    discountPerUnit = unitPrice * (currentDiscount.value / 100);
+  } else if (currentDiscount.type === 'fixed') {
+    discountPerUnit = currentDiscount.value;
+  }
+  var totalDiscount = Math.min(discountPerUnit * qty, subtotal);
+  var total = Math.max(0, subtotal - totalDiscount);
+
+  document.getElementById('subtotalDisplay').textContent = '$' + subtotal.toFixed(2);
+
+  var discountRow = document.getElementById('discountRow');
+  if (totalDiscount > 0) {
+    discountRow.style.display = 'flex';
+    document.getElementById('discountDisplay').textContent = '-$' + totalDiscount.toFixed(2);
+  } else {
+    discountRow.style.display = 'none';
+  }
+
+  document.getElementById('totalDisplay').textContent = '$' + total.toFixed(2);
+
+  var btn = document.getElementById('buyBtn');
+  btn.textContent = total > 0 ? 'Buy Tickets — $' + total.toFixed(2) : 'Get Free Tickets';
+}
+
+function validatePromo() {
+  var code = document.getElementById('promoCode').value.trim();
+  if (!code) return;
+
+  fetch('/events/<%= event.id %>/promo/validate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: code })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var el = document.getElementById('promoResult');
+    el.style.display = 'block';
+    if (data.valid) {
+      currentDiscount = { type: data.discountType, value: data.discountValue };
+      var desc = data.discountType === 'percentage' ? data.discountValue + '% off' : '$' + data.discountValue.toFixed(2) + ' off';
+      el.innerHTML = '<span style="color: var(--success);">Code applied: ' + desc + '</span>';
+    } else {
+      currentDiscount = { type: null, value: 0 };
+      el.innerHTML = '<span style="color: var(--error);">' + data.message + '</span>';
+    }
+    updatePrice();
+  })
+  .catch(function() {
+    currentDiscount = { type: null, value: 0 };
+    updatePrice();
+  });
+}
+
+updatePrice();
+</script>
+
+<%- include('layout-end', { registerSW: false }) %>
