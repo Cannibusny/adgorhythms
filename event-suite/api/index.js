@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const helmet = require('helmet');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -22,6 +23,9 @@ const eventRoutes = require('../src/routes/events');
 const checkinRoutes = require('../src/routes/checkin');
 
 const app = express();
+
+// Trust Vercel's proxy so secure cookies work behind HTTPS
+app.set('trust proxy', 1);
 
 // View engine
 app.set('view engine', 'ejs');
@@ -59,6 +63,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(session({
+  store: new pgSession({
+    pool: db.pool,
+    tableName: 'user_sessions',
+    createTableIfMissing: true,
+  }),
   secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
   resave: false,
   saveUninitialized: false,
@@ -66,8 +75,23 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000,
+    sameSite: 'lax',
   },
 }));
+
+// Ensure POST redirects use 303 (GET) to prevent 307 method-preserving redirects
+app.use((req, res, next) => {
+  if (req.method === 'POST') {
+    const originalRedirect = res.redirect.bind(res);
+    res.redirect = function redirect(statusOrUrl, url) {
+      if (typeof statusOrUrl === 'string') {
+        return originalRedirect(303, statusOrUrl);
+      }
+      return originalRedirect(statusOrUrl, url);
+    };
+  }
+  next();
+});
 
 // Routes
 app.use('/', authRoutes);
