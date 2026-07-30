@@ -1,7 +1,7 @@
 <%- include('layout-start', { title: 'Create Event', promoter: promoter }) %>
 
 <h1>Create Event</h1>
-<h2>Set up a new event for check-in management</h2>
+<h2>Set up a new event with registration + check-in</h2>
 
 <% if (typeof error !== 'undefined' && error) { %>
 <div class="flash flash-error"><%= error %></div>
@@ -9,11 +9,13 @@
 
 <div class="card" style="padding: 2rem;">
   <form method="POST" action="/checkin/new">
+    <h3 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;">Event Details</h3>
+
     <label for="name">Event Name *</label>
-    <input type="text" name="name" id="name" placeholder="Father's Day Cookout 2026" required value="<%= typeof form !== 'undefined' && form ? form.name || '' : '' %>" />
+    <input type="text" name="name" id="name" placeholder="Father's Day Roast & Toast Comedy Show + Day Party" required value="<%= typeof form !== 'undefined' && form ? form.name || '' : '' %>" />
 
     <label for="description">Description</label>
-    <textarea name="description" id="description" rows="3" placeholder="Tell attendees what to expect..."><%= typeof form !== 'undefined' && form ? form.description || '' : '' %></textarea>
+    <textarea name="description" id="description" rows="3" placeholder="Comedy, food, drinks, and good vibes. Cash bar available. Payments due on-site."><%= typeof form !== 'undefined' && form ? form.description || '' : '' %></textarea>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
       <div>
@@ -42,12 +44,25 @@
         <label for="currency">Currency</label>
         <select name="currency" id="currency">
           <option value="USD" selected>USD ($)</option>
-          <option value="EUR">EUR (&#x20AC;)</option>
-          <option value="GBP">GBP (&#xA3;)</option>
-          <option value="JMD">JMD (J$)</option>
-          <option value="TTD">TTD (TT$)</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+          <option value="JMD">JMD</option>
         </select>
       </div>
+    </div>
+
+    <!-- Package Configuration -->
+    <h3 style="font-size: 0.9rem; color: var(--text-muted); margin: 1.5rem 0 1rem; text-transform: uppercase; letter-spacing: 1px; padding-top: 1rem; border-top: 1px solid var(--border);">Table / Package Options</h3>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Add packages that guests can select during registration. Click the buttons below to add options.</p>
+
+    <div id="packages-container">
+      <!-- Empty by default — use add buttons below -->
+    </div>
+
+    <!-- Add Package Buttons -->
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+      <button type="button" onclick="addPackage('Gold')" class="btn btn-sm" style="background: rgba(255,215,0,0.15); color: #FFD700; border: 1px solid rgba(255,215,0,0.3);">+ Add Gold Package</button>
+      <button type="button" onclick="addPackage('Premium')" class="btn btn-sm" style="background: rgba(199,146,234,0.15); color: #c792ea; border: 1px solid rgba(199,146,234,0.3);">+ Add Premium Package</button>
     </div>
 
     <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">Create Event</button>
@@ -57,5 +72,35 @@
 <div style="text-align: center; margin-top: 1rem;">
   <a href="/checkin" style="color: var(--text-muted); text-decoration: none;">&larr; Back to My Events</a>
 </div>
+
+<script>
+function addPackage(tier) {
+  const container = document.getElementById('packages-container');
+  const color = tier === 'Gold' ? '#FFD700' : '#c792ea';
+
+  const row = document.createElement('div');
+  row.className = 'package-row';
+  row.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 2fr auto; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;';
+  row.innerHTML = `
+    <input type="text" name="pkg_name[]" placeholder="e.g. Table for 4" style="margin-bottom: 0;" />
+    <input type="number" name="pkg_price[]" placeholder="Price" style="margin-bottom: 0;" />
+    <input type="text" name="pkg_desc[]" placeholder="e.g. 2 Bottles + Food for 2" style="margin-bottom: 0;" />
+    <input type="hidden" name="pkg_tier[]" value="${tier}" />
+    <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm" style="padding: 0.5rem;">&#x2715;</button>
+  `;
+
+  // Find or create tier section
+  let section = container.querySelector('[data-tier="' + tier + '"]');
+  if (!section) {
+    section = document.createElement('div');
+    section.className = 'tier-section';
+    section.dataset.tier = tier;
+    section.style.marginBottom = '1rem';
+    section.innerHTML = '<label style="color: ' + color + '; font-weight: 600; font-size: 0.85rem;">' + tier.toUpperCase() + ' PACKAGES</label>';
+    container.appendChild(section);
+  }
+  section.appendChild(row);
+}
+</script>
 
 <%- include('layout-end') %>

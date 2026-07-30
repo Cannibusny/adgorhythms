@@ -1,0 +1,24 @@
+<%- include('layout-start', { title: event.name + ' — QR Code', promoter: promoter }) %>
+
+<div style="text-align: center; max-width: 500px; margin: 0 auto;">
+  <h1><%= event.name %></h1>
+  <h2>Registration QR Code</h2>
+
+  <div class="card" style="padding: 2rem; margin-top: 1.5rem;">
+    <img src="<%= qrDataUrl %>" alt="QR Code" style="width: 100%; max-width: 300px; border-radius: 8px;" />
+    <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.85rem;">
+      Guests scan this code to register for the event.
+    </p>
+    <div style="margin-top: 1rem; padding: 0.75rem; background: var(--surface-2); border-radius: 8px; word-break: break-all; font-size: 0.8rem; color: var(--text-muted);">
+      <%= registrationUrl %>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
+    <a href="/checkin/<%= event.id %>/registrations" class="btn btn-primary btn-sm">View Registrations</a>
+    <a href="/checkin/<%= event.id %>/admin" class="btn btn-sm" style="background: var(--surface-2); color: var(--text);">Check-In View</a>
+    <a href="/checkin" class="btn btn-sm" style="background: var(--surface-2); color: var(--text);">&larr; All Events</a>
+  </div>
+</div>
+
+<%- include('layout-end') %>

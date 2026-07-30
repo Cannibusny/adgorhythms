@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>You're In! — <%= event.name %></title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface-2: #1a1a25;
+      --border: #2a2a3a;
+      --text: #e8e8f0;
+      --text-muted: #8888a0;
+      --accent: #6c5ce7;
+      --success: #00b894;
+      --success-bg: rgba(0, 184, 148, 0.08);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+
+    .checkmark {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--success-bg);
+      border: 3px solid var(--success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 2.5rem;
+      animation: pop 0.4s ease;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      70% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+      color: var(--success);
+    }
+    .subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 400px;
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+    .info-card h3 {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .label { color: var(--text-muted); }
+    .info-row .value { font-weight: 600; text-align: right; }
+
+    .reminders {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 400px;
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+    .reminders h3 {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.75rem;
+    }
+    .reminders ul {
+      list-style: none;
+      padding: 0;
+    }
+    .reminders li {
+      font-size: 0.88rem;
+      padding: 0.4rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+      color: var(--text);
+    }
+    .reminders li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .footer {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 1.5rem 1rem; }
+      h1 { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="checkmark">&#x2714;</div>
+  <h1>You're In!</h1>
+  <p class="subtitle">Your spot has been reserved for<br /><strong><%= event.name %></strong></p>
+
+  <div class="info-card">
+    <h3>Your Registration</h3>
+    <div class="info-row">
+      <span class="label">Name</span>
+      <span class="value"><%= guest.fullName %></span>
+    </div>
+    <div class="info-row">
+      <span class="label">Group Size</span>
+      <span class="value"><%= guest.groupSize %> <%= guest.groupSize === 1 ? 'person' : 'people' %></span>
+    </div>
+    <% if (selectedPackage) { %>
+    <div class="info-row">
+      <span class="label">Package</span>
+      <span class="value"><%= selectedPackage.tier %> — <%= selectedPackage.name %></span>
+    </div>
+    <div class="info-row">
+      <span class="label">Price</span>
+      <span class="value">$<%= Number(selectedPackage.price).toLocaleString() %></span>
+    </div>
+    <% } %>
+    <div class="info-row">
+      <span class="label">Date</span>
+      <span class="value"><%= new Date(event.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+    </div>
+    <div class="info-row">
+      <span class="label">Venue</span>
+      <span class="value"><%= event.location %></span>
+    </div>
+  </div>
+
+  <div class="reminders">
+    <h3>Important Info</h3>
+    <ul>
+      <li>Payments are collected on-site (cash or card)</li>
+      <li>Arrive 15 minutes early to check in</li>
+      <li>Cash bar available</li>
+      <li>You'll receive a confirmation text/email soon</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    Powered by ADgorhythms Event Suite
+  </div>
+</body>
+</html>

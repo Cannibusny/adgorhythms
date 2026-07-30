@@ -2,7 +2,7 @@ const axios = require('axios');
 const db = require('../../db');
 const { decrypt } = require('../encryption');
 
-const META_GRAPH_VERSION = 'v19.0';
+const META_GRAPH_VERSION = 'v21.0';
 
 async function getMetaCredentials(promoterId) {
   const result = await db.query(

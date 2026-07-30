@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title><%= event.name %> — Register</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface-2: #1a1a25;
+      --border: #2a2a3a;
+      --text: #e8e8f0;
+      --text-muted: #8888a0;
+      --accent: #6c5ce7;
+      --accent-hover: #7c6df7;
+      --gold: #FFD700;
+      --gold-bg: rgba(255, 215, 0, 0.08);
+      --gold-border: rgba(255, 215, 0, 0.3);
+      --premium: #c792ea;
+      --premium-bg: rgba(199, 146, 234, 0.08);
+      --premium-border: rgba(199, 146, 234, 0.3);
+      --success: #00b894;
+      --error: #e74c3c;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* Hero header */
+    .hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 2.5rem 1.5rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero .brand {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    .hero h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      line-height: 1.3;
+    }
+    .hero .event-details {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .hero .event-details span {
+      display: inline-block;
+      margin: 0.25rem 0.5rem;
+    }
+    .hero .event-details .icon {
+      margin-right: 0.25rem;
+    }
+    .hero .description {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Main content */
+    .main {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* Error flash */
+    .flash-error {
+      background: rgba(231,76,60,0.1);
+      border: 1px solid var(--error);
+      color: var(--error);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    /* Section titles */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Form */
+    .form-group { margin-bottom: 1rem; }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+    }
+    input::placeholder, textarea::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    /* Package selection */
+    .packages { margin-bottom: 1.5rem; }
+    .package-tier-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin: 1rem 0 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .package-tier-title.gold { color: var(--gold); }
+    .package-tier-title.premium { color: var(--premium); }
+
+    .package-option {
+      display: block;
+      position: relative;
+      padding: 1rem 1.25rem;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface);
+    }
+    .package-option:hover {
+      border-color: var(--accent);
+    }
+    .package-option.gold-pkg { border-color: var(--gold-border); background: var(--gold-bg); }
+    .package-option.gold-pkg:hover { border-color: var(--gold); }
+    .package-option.premium-pkg { border-color: var(--premium-border); background: var(--premium-bg); }
+    .package-option.premium-pkg:hover { border-color: var(--premium); }
+
+    .package-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .package-option.selected {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.3);
+    }
+    .package-option .pkg-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .package-option .pkg-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .package-option .pkg-price {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+    .package-option .pkg-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      padding: 1rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 1rem;
+    }
+    .btn-submit:hover { background: var(--accent-hover); }
+    .btn-submit:active { transform: scale(0.98); }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 480px) {
+      .hero { padding: 2rem 1rem 1.5rem; }
+      .hero h1 { font-size: 1.35rem; }
+      .main { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="brand">ADgorhythms Presents</div>
+    <h1><%= event.name %></h1>
+    <div class="event-details">
+      <span><span class="icon">&#x1F4C5;</span> <%= new Date(event.event_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) %></span>
+      <span><span class="icon">&#x1F554;</span> <%= new Date(event.event_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %></span>
+      <span><span class="icon">&#x1F4CD;</span> <%= event.location %></span>
+    </div>
+    <% if (event.description) { %>
+      <div class="description"><%= event.description %></div>
+    <% } %>
+  </div>
+
+  <div class="main">
+    <% if (error) { %>
+      <div class="flash-error"><%= error %></div>
+    <% } %>
+
+    <form method="POST" action="/e/<%= event.id %>">
+      <h3 class="section-title">Your Info</h3>
+
+      <div class="form-group">
+        <label for="fullName">Full Name *</label>
+        <input type="text" name="fullName" id="fullName" placeholder="John Smith" required
+          value="<%= form ? form.fullName || '' : '' %>" />
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone Number *</label>
+        <input type="tel" name="phone" id="phone" placeholder="(347) 555-1234" required
+          value="<%= form ? form.phone || '' : '' %>" />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input type="email" name="email" id="email" placeholder="you@example.com" required
+          value="<%= form ? form.email || '' : '' %>" />
+      </div>
+
+      <div class="form-group">
+        <label for="groupSize">Number of People in Your Group</label>
+        <select name="groupSize" id="groupSize">
+          <option value="1" <%= form && form.groupSize === '1' ? 'selected' : '' %>>1 person</option>
+          <option value="2" <%= form && form.groupSize === '2' ? 'selected' : '' %>>2 people</option>
+          <option value="3" <%= form && form.groupSize === '3' ? 'selected' : '' %>>3 people</option>
+          <option value="4" <%= form && form.groupSize === '4' ? 'selected' : '' %>>4 people</option>
+          <option value="5" <%= form && form.groupSize === '5' ? 'selected' : '' %>>5 people</option>
+          <option value="6" <%= form && form.groupSize === '6' ? 'selected' : '' %>>6 people</option>
+          <option value="7" <%= form && form.groupSize === '7' ? 'selected' : '' %>>7 people</option>
+          <option value="8" <%= form && form.groupSize === '8' ? 'selected' : '' %>>8+ people</option>
+        </select>
+      </div>
+
+      <% if (packages.length > 0) { %>
+        <h3 class="section-title" style="margin-top: 1.5rem;">Select Your Package</h3>
+        <div class="packages">
+          <% const goldPkgs = packages.filter(p => p.tier === 'Gold'); %>
+          <% const premiumPkgs = packages.filter(p => p.tier === 'Premium'); %>
+
+          <% if (goldPkgs.length > 0) { %>
+            <div class="package-tier-title gold">&#x2B50; Gold Packages</div>
+            <% goldPkgs.forEach(pkg => { %>
+              <label class="package-option gold-pkg" id="pkg-label-<%= pkg.id %>">
+                <input type="radio" name="packageId" value="<%= pkg.id %>"
+                  <%= form && form.packageId === pkg.id ? 'checked' : '' %>
+                  onchange="selectPackage('<%= pkg.id %>')" />
+                <div class="pkg-header">
+                  <span class="pkg-name"><%= pkg.name %></span>
+                  <span class="pkg-price">$<%= Number(pkg.price).toLocaleString() %></span>
+                </div>
+                <div class="pkg-desc"><%= pkg.description %></div>
+              </label>
+            <% }) %>
+          <% } %>
+
+          <% if (premiumPkgs.length > 0) { %>
+            <div class="package-tier-title premium">&#x1F48E; Premium Packages</div>
+            <% premiumPkgs.forEach(pkg => { %>
+              <label class="package-option premium-pkg" id="pkg-label-<%= pkg.id %>">
+                <input type="radio" name="packageId" value="<%= pkg.id %>"
+                  <%= form && form.packageId === pkg.id ? 'checked' : '' %>
+                  onchange="selectPackage('<%= pkg.id %>')" />
+                <div class="pkg-header">
+                  <span class="pkg-name"><%= pkg.name %></span>
+                  <span class="pkg-price">$<%= Number(pkg.price).toLocaleString() %></span>
+                </div>
+                <div class="pkg-desc"><%= pkg.description %></div>
+              </label>
+            <% }) %>
+          <% } %>
+        </div>
+      <% } %>
+
+      <div class="form-group">
+        <label for="notes">Notes / Special Requests (optional)</label>
+        <textarea name="notes" id="notes" rows="3" placeholder="Dietary restrictions, birthday, etc."><%= form ? form.notes || '' : '' %></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit">Reserve My Spot</button>
+    </form>
+
+    <div class="footer-note">
+      Powered by ADgorhythms Event Suite<br />
+      Payment is collected on-site &mdash; this form reserves your spot.
+    </div>
+  </div>
+
+  <script>
+    function selectPackage(id) {
+      document.querySelectorAll('.package-option').forEach(el => el.classList.remove('selected'));
+      const label = document.getElementById('pkg-label-' + id);
+      if (label) label.classList.add('selected');
+    }
+    // Highlight pre-selected package on load
+    document.querySelectorAll('.package-option input[type="radio"]:checked').forEach(input => {
+      input.closest('.package-option').classList.add('selected');
+    });
+  </script>
+</body>
+</html>

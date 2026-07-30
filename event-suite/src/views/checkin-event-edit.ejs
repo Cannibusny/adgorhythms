@@ -1,0 +1,142 @@
+<%- include('layout-start', { title: 'Edit Event', promoter: promoter }) %>
+
+<h1>Edit Event</h1>
+<h2>Update event details and packages</h2>
+
+<% if (error) { %>
+<div class="flash flash-error"><%= error %></div>
+<% } %>
+
+<div class="card" style="padding: 2rem;">
+  <form method="POST" action="/checkin/<%= event.id %>/edit">
+    <h3 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;">Event Details</h3>
+
+    <label for="name">Event Name *</label>
+    <input type="text" name="name" id="name" required value="<%= event.name %>" />
+
+    <label for="description">Description</label>
+    <textarea name="description" id="description" rows="3"><%= event.description || '' %></textarea>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div>
+        <label for="date">Date *</label>
+        <input type="date" name="date" id="date" required value="<%= new Date(event.event_date).toISOString().split('T')[0] %>" />
+      </div>
+      <div>
+        <label for="time">Time *</label>
+        <input type="time" name="time" id="time" required value="<%= new Date(event.event_date).toTimeString().slice(0,5) %>" />
+      </div>
+    </div>
+
+    <label for="location">Venue / Location *</label>
+    <input type="text" name="location" id="location" required value="<%= event.location %>" />
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+      <div>
+        <label for="city">City</label>
+        <input type="text" name="city" id="city" value="<%= event.city || '' %>" />
+      </div>
+      <div>
+        <label for="region">Region</label>
+        <input type="text" name="region" id="region" value="<%= event.region || 'NYC' %>" />
+      </div>
+      <div>
+        <label for="currency">Currency</label>
+        <select name="currency" id="currency">
+          <option value="USD" <%= event.currency === 'USD' ? 'selected' : '' %>>USD ($)</option>
+          <option value="EUR" <%= event.currency === 'EUR' ? 'selected' : '' %>>EUR</option>
+          <option value="GBP" <%= event.currency === 'GBP' ? 'selected' : '' %>>GBP</option>
+          <option value="JMD" <%= event.currency === 'JMD' ? 'selected' : '' %>>JMD</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Package Configuration -->
+    <h3 style="font-size: 0.9rem; color: var(--text-muted); margin: 1.5rem 0 1rem; text-transform: uppercase; letter-spacing: 1px; padding-top: 1rem; border-top: 1px solid var(--border);">Table / Package Options</h3>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Add, edit, or remove packages. Guests will see these options on the registration page.</p>
+
+    <div id="packages-container">
+      <% const goldPkgs = packages.filter(p => p.tier === 'Gold'); %>
+      <% const premiumPkgs = packages.filter(p => p.tier === 'Premium'); %>
+
+      <% if (goldPkgs.length > 0) { %>
+      <div class="tier-section" data-tier="Gold" style="margin-bottom: 1rem;">
+        <label style="color: #FFD700; font-weight: 600; font-size: 0.85rem;">GOLD PACKAGES</label>
+        <% goldPkgs.forEach(pkg => { %>
+        <div class="package-row" style="display: grid; grid-template-columns: 2fr 1fr 2fr auto; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;">
+          <input type="text" name="pkg_name[]" value="<%= pkg.name %>" placeholder="Package name" style="margin-bottom: 0;" />
+          <input type="number" name="pkg_price[]" value="<%= Number(pkg.price) %>" placeholder="Price" style="margin-bottom: 0;" />
+          <input type="text" name="pkg_desc[]" value="<%= pkg.description %>" placeholder="Description" style="margin-bottom: 0;" />
+          <input type="hidden" name="pkg_tier[]" value="Gold" />
+          <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm" style="padding: 0.5rem;">✕</button>
+        </div>
+        <% }) %>
+      </div>
+      <% } %>
+
+      <% if (premiumPkgs.length > 0) { %>
+      <div class="tier-section" data-tier="Premium" style="margin-bottom: 1rem;">
+        <label style="color: #c792ea; font-weight: 600; font-size: 0.85rem;">PREMIUM PACKAGES</label>
+        <% premiumPkgs.forEach(pkg => { %>
+        <div class="package-row" style="display: grid; grid-template-columns: 2fr 1fr 2fr auto; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;">
+          <input type="text" name="pkg_name[]" value="<%= pkg.name %>" placeholder="Package name" style="margin-bottom: 0;" />
+          <input type="number" name="pkg_price[]" value="<%= Number(pkg.price) %>" placeholder="Price" style="margin-bottom: 0;" />
+          <input type="text" name="pkg_desc[]" value="<%= pkg.description %>" placeholder="Description" style="margin-bottom: 0;" />
+          <input type="hidden" name="pkg_tier[]" value="Premium" />
+          <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm" style="padding: 0.5rem;">✕</button>
+        </div>
+        <% }) %>
+      </div>
+      <% } %>
+
+      <% if (goldPkgs.length === 0 && premiumPkgs.length === 0) { %>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">No packages yet. Add Gold or Premium packages below.</p>
+      <% } %>
+    </div>
+
+    <!-- Add Package Buttons -->
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+      <button type="button" onclick="addPackage('Gold')" class="btn btn-sm" style="background: rgba(255,215,0,0.15); color: #FFD700; border: 1px solid rgba(255,215,0,0.3);">+ Add Gold Package</button>
+      <button type="button" onclick="addPackage('Premium')" class="btn btn-sm" style="background: rgba(199,146,234,0.15); color: #c792ea; border: 1px solid rgba(199,146,234,0.3);">+ Add Premium Package</button>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">Save Changes</button>
+  </form>
+</div>
+
+<div style="text-align: center; margin-top: 1rem;">
+  <a href="/checkin/<%= event.id %>/admin" style="color: var(--text-muted); text-decoration: none;">&larr; Back to Admin</a>
+</div>
+
+<script>
+function addPackage(tier) {
+  const container = document.getElementById('packages-container');
+  const color = tier === 'Gold' ? '#FFD700' : '#c792ea';
+  const borderColor = tier === 'Gold' ? 'rgba(255,215,0,0.3)' : 'rgba(199,146,234,0.3)';
+
+  const row = document.createElement('div');
+  row.className = 'package-row';
+  row.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 2fr auto; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;';
+  row.innerHTML = `
+    <input type="text" name="pkg_name[]" placeholder="e.g. Table for 4" style="margin-bottom: 0;" />
+    <input type="number" name="pkg_price[]" placeholder="Price" style="margin-bottom: 0;" />
+    <input type="text" name="pkg_desc[]" placeholder="e.g. 2 Bottles + Food for 2" style="margin-bottom: 0;" />
+    <input type="hidden" name="pkg_tier[]" value="${tier}" />
+    <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm" style="padding: 0.5rem;">✕</button>
+  `;
+
+  // Find or create tier section
+  let section = container.querySelector('[data-tier="' + tier + '"]');
+  if (!section) {
+    section = document.createElement('div');
+    section.className = 'tier-section';
+    section.dataset.tier = tier;
+    section.style.marginBottom = '1rem';
+    section.innerHTML = '<label style="color: ' + color + '; font-weight: 600; font-size: 0.85rem;">' + tier.toUpperCase() + ' PACKAGES</label>';
+    container.appendChild(section);
+  }
+  section.appendChild(row);
+}
+</script>
+
+<%- include('layout-end') %>

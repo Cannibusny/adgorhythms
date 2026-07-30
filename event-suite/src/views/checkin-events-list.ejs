@@ -32,6 +32,9 @@
       </div>
     </div>
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <a href="/checkin/<%= event.id %>/edit" class="btn btn-sm" style="background: var(--surface-2); color: var(--warning);">Edit</a>
+      <a href="/checkin/<%= event.id %>/registrations" class="btn btn-sm" style="background: var(--surface-2); color: var(--text);">Registrations</a>
+      <a href="/checkin/<%= event.id %>/qr" class="btn btn-sm" style="background: var(--gold); color: #000;">QR Code</a>
       <a href="/checkin/<%= event.id %>/admin" class="btn btn-sm" style="background: var(--surface-2); color: var(--text);">Admin</a>
       <a href="/checkin/<%= event.id %>/scan" class="btn btn-sm" style="background: var(--accent); color: #fff;">Check-In</a>
       <a href="/checkin/<%= event.id %>/live" class="btn btn-sm" style="background: var(--success); color: #fff;">Live</a>

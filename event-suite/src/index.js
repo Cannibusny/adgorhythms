@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -9,6 +10,7 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 
 const db = require('./db');
+const { organizationSchema, injectSchemas } = require('./utils/schema');
 
 // Routes
 const authRoutes = require('./routes/auth');
@@ -21,12 +23,15 @@ const klaviyoRoutes = require('./routes/api/klaviyo');
 const statusRoutes = require('./routes/api/status');
 const eventRoutes = require('./routes/events');
 const checkinRoutes = require('./routes/checkin');
+const registerPublicRoutes = require('./routes/register-public');
 
 // Jobs
 const { startTokenRefresher } = require('./jobs/tokenRefresher');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.set('trust proxy', 1);
 
 // View engine
 app.set('view engine', 'ejs');
@@ -43,6 +48,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(session({
+  store: new pgSession({
+    pool: db.pool,
+    tableName: 'user_sessions',
+    createTableIfMissing: true,
+  }),
   secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
   resave: false,
   saveUninitialized: false,
@@ -56,6 +66,12 @@ app.use(session({
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Inject Organization schema on every page
+app.use((_req, res, next) => {
+  res.locals.schemas = injectSchemas([organizationSchema()]);
+  next();
+});
+
 // Routes
 app.use('/', authRoutes);
 app.use('/', dashboardRoutes);
@@ -67,6 +83,7 @@ app.use('/settings/klaviyo', klaviyoRoutes);
 app.use('/api', statusRoutes);
 app.use('/events', eventRoutes);
 app.use('/checkin', checkinRoutes);
+app.use('/e', registerPublicRoutes);
 
 // Root redirect
 app.get('/', (_req, res) => {
@@ -235,6 +252,34 @@ async function runMigration() {
       checked_in_by UUID REFERENCES promoters(id),
       checked_in_at TIMESTAMP DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS event_packages (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      event_id UUID REFERENCES checkin_events(id) ON DELETE CASCADE,
+      tier VARCHAR(50) NOT NULL DEFAULT 'Gold',
+      name VARCHAR(255) NOT NULL,
+      price DECIMAL(10,2) NOT NULL DEFAULT 0,
+      description TEXT DEFAULT '',
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_event_packages_event ON event_packages (event_id);
+
+    CREATE TABLE IF NOT EXISTS guest_registrations (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      event_id UUID REFERENCES checkin_events(id) ON DELETE CASCADE,
+      promoter_id UUID REFERENCES promoters(id) ON DELETE CASCADE,
+      full_name VARCHAR(255) NOT NULL,
+      phone VARCHAR(50) NOT NULL,
+      email VARCHAR(255) NOT NULL,
+      group_size INTEGER DEFAULT 1,
+      package_id UUID,
+      package_name VARCHAR(255),
+      notes TEXT,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_guest_reg_event ON guest_registrations (event_id);
+    CREATE INDEX IF NOT EXISTS idx_guest_reg_promoter ON guest_registrations (promoter_id);
+    CREATE INDEX IF NOT EXISTS idx_guest_reg_email ON guest_registrations (email);
   `;
   try {
     await db.query(migration);
