@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../db');
+const { eventSchema, injectSchemas } = require('../utils/schema');
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ router.get('/:eventId', async (req, res) => {
 
     // Get packages for this event
     const packagesResult = await db.query(
-      `SELECT * FROM event_packages WHERE event_id = $1 ORDER BY tier, price ASC`,
+      'SELECT * FROM event_packages WHERE event_id = $1 ORDER BY tier, price ASC',
       [eventId]
     );
 
@@ -34,6 +35,7 @@ router.get('/:eventId', async (req, res) => {
       [eventId]
     );
 
+    const extraSchemas = injectSchemas([eventSchema(event)]);
     res.render('event-register', {
       event,
       packages: packagesResult.rows,
@@ -41,6 +43,7 @@ router.get('/:eventId', async (req, res) => {
       promoter: null,
       error: null,
       form: null,
+      extraSchemas,
     });
   } catch (err) {
     console.error('Error loading event registration:', err);

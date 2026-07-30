@@ -1,40 +1,90 @@
 const express = require('express');
 const axios = require('axios');
+const crypto = require('crypto');
 const { encrypt } = require('../../utils/encryption');
 const { requireAuth } = require('../../middleware/auth');
 const db = require('../../db');
 
 const router = express.Router();
 
-const META_GRAPH_VERSION = 'v19.0';
+const META_GRAPH_VERSION = 'v21.0';
+
+function getRedirectUri(req) {
+  if (process.env.META_REDIRECT_URI) {
+    return process.env.META_REDIRECT_URI;
+  }
+  const baseUrl =
+    process.env.BASE_URL ||
+    `${req.protocol}://${req.get('host')}`;
+  return `${baseUrl}/oauth/meta/callback`;
+}
 
 router.get('/connect', requireAuth, (req, res) => {
-  const redirectUri = `${process.env.BASE_URL}/oauth/meta/callback`;
-  const scope = 'ads_management,ads_read,business_management';
+  const appId = process.env.META_APP_ID;
+  if (!appId) {
+    console.error('META_APP_ID is not configured');
+    return res.redirect('/dashboard?meta=error&reason=missing_config');
+  }
+
+  const state = crypto.randomBytes(16).toString('hex');
+  req.session.metaOAuthState = state;
+
+  const redirectUri = getRedirectUri(req);
+  const scope = [
+    'ads_management',
+    'ads_read',
+    'business_management',
+    'pages_read_engagement',
+    'instagram_basic',
+  ].join(',');
+
   const authUrl =
     `https://www.facebook.com/${META_GRAPH_VERSION}/dialog/oauth` +
-    `?client_id=${process.env.META_APP_ID}` +
+    `?client_id=${appId}` +
     `&redirect_uri=${encodeURIComponent(redirectUri)}` +
     `&scope=${scope}` +
+    `&state=${state}` +
     '&response_type=code';
-  res.redirect(authUrl);
+
+  req.session.save(() => res.redirect(authUrl));
 });
 
 router.get('/callback', requireAuth, async (req, res) => {
-  const { code, error } = req.query;
+  const { code, error, error_description, state } = req.query;
+
   if (error) {
-    console.error('Meta OAuth error:', error);
-    return res.redirect('/dashboard?meta=error');
+    console.error('Meta OAuth error:', error, error_description);
+    return res.redirect(
+      `/dashboard?meta=error&reason=${encodeURIComponent(error_description || error)}`
+    );
+  }
+
+  if (!code) {
+    return res.redirect('/dashboard?meta=error&reason=no_code');
+  }
+
+  if (req.session.metaOAuthState && state !== req.session.metaOAuthState) {
+    console.error('Meta OAuth state mismatch');
+    return res.redirect('/dashboard?meta=error&reason=state_mismatch');
+  }
+  delete req.session.metaOAuthState;
+
+  const appId = process.env.META_APP_ID;
+  const appSecret = process.env.META_APP_SECRET;
+  if (!appId || !appSecret) {
+    console.error('META_APP_ID or META_APP_SECRET not configured');
+    return res.redirect('/dashboard?meta=error&reason=missing_config');
   }
 
   try {
-    const redirectUri = `${process.env.BASE_URL}/oauth/meta/callback`;
+    const redirectUri = getRedirectUri(req);
+
     const tokenResponse = await axios.get(
       `https://graph.facebook.com/${META_GRAPH_VERSION}/oauth/access_token`,
       {
         params: {
-          client_id: process.env.META_APP_ID,
-          client_secret: process.env.META_APP_SECRET,
+          client_id: appId,
+          client_secret: appSecret,
           redirect_uri: redirectUri,
           code,
         },
@@ -43,14 +93,13 @@ router.get('/callback', requireAuth, async (req, res) => {
 
     const { access_token: shortLivedToken } = tokenResponse.data;
 
-    // Exchange for long-lived token (60 days)
     const longLivedResponse = await axios.get(
       `https://graph.facebook.com/${META_GRAPH_VERSION}/oauth/access_token`,
       {
         params: {
           grant_type: 'fb_exchange_token',
-          client_id: process.env.META_APP_ID,
-          client_secret: process.env.META_APP_SECRET,
+          client_id: appId,
+          client_secret: appSecret,
           fb_exchange_token: shortLivedToken,
         },
       }
@@ -59,7 +108,6 @@ router.get('/callback', requireAuth, async (req, res) => {
     const { access_token: longLivedToken, expires_in } = longLivedResponse.data;
     const expiresAt = new Date(Date.now() + (expires_in || 5184000) * 1000);
 
-    // Fetch ad accounts
     let accountId = null;
     try {
       const accountsResponse = await axios.get(
@@ -87,8 +135,13 @@ router.get('/callback', requireAuth, async (req, res) => {
 
     res.redirect('/dashboard?meta=connected');
   } catch (err) {
-    console.error('Meta OAuth callback error:', err.response?.data || err.message);
-    res.redirect('/dashboard?meta=error');
+    const errData = err.response?.data?.error || err.response?.data || err.message;
+    console.error('Meta OAuth callback error:', errData);
+    const reason =
+      typeof errData === 'object' ? errData.message || JSON.stringify(errData) : errData;
+    res.redirect(
+      `/dashboard?meta=error&reason=${encodeURIComponent(reason)}`
+    );
   }
 });
 
@@ -97,7 +150,7 @@ router.post('/disconnect', requireAuth, async (req, res) => {
     'DELETE FROM credentials WHERE promoter_id = $1 AND platform = $2',
     [req.session.promoterId, 'meta']
   );
-  res.redirect('/dashboard');
+  res.redirect(303, '/dashboard');
 });
 
 module.exports = router;

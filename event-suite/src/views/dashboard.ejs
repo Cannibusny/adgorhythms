@@ -10,7 +10,7 @@
   ${flash.stripe === 'connected' ? '<div class="flash flash-success">Stripe connected successfully!</div>' : ''}
   ${flash.twilio === 'connected' ? '<div class="flash flash-success">Twilio connected successfully!</div>' : ''}
   ${flash.klaviyo === 'connected' ? '<div class="flash flash-success">Klaviyo connected successfully!</div>' : ''}
-  ${flash.meta === 'error' ? '<div class="flash flash-error">Failed to connect Meta Ads. Please try again.</div>' : ''}
+  ${flash.meta === 'error' ? '<div class="flash flash-error">Failed to connect Meta Ads.' + (flash.reason ? ' (' + decodeURIComponent(flash.reason) + ')' : ' Please try again.') + '</div>' : ''}
   ${flash.google === 'error' ? '<div class="flash flash-error">Failed to connect Google Ads. Please try again.</div>' : ''}
   ${flash.stripe === 'error' ? '<div class="flash flash-error">Failed to connect Stripe. Please try again.</div>' : ''}
 
