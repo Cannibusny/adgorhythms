@@ -1,0 +1,176 @@
+{
+  "name": "Cannibus NY — Lead Capture Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cannibusny-lead-capture",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "b1a1f0e0-0001-4a01-9a01-000000000001",
+      "name": "Lead Capture Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        0
+      ],
+      "webhookId": "cannibusny-lead-capture"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body ?? $input.first().json;\nconst firstName = (body.firstName ?? '').toString().trim();\nconst email = (body.email ?? '').toString().trim().toLowerCase();\nlet phone = (body.phone ?? '').toString().replace(/[^0-9+]/g, '');\nif (!phone.startsWith('+')) {\n  phone = phone.length === 10 ? `+1${phone}` : `+${phone}`;\n}\nconst source = (body.source ?? 'n8n-webhook').toString().trim();\nif (!firstName || !/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email) || !/^\\+[1-9]\\d{7,14}$/.test(phone)) {\n  throw new Error('Invalid lead payload: firstName, email and E.164 phone are required');\n}\nreturn [{ json: { firstName, email, phone, source } }];"
+      },
+      "id": "b1a1f0e0-0002-4a01-9a01-000000000002",
+      "name": "Validate & Normalize Lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -100,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://a.klaviyo.com/api/profiles/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Klaviyo-API-Key {{$env.KLAVIYO_API_KEY}}"
+            },
+            {
+              "name": "revision",
+              "value": "2024-10-15"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ data: { type: 'profile', attributes: { email: $json.email, phone_number: $json.phone, first_name: $json.firstName, properties: { membership_tier: 'VIP-Founding-Member', lead_source: $json.source, location: 'New Paltz, NY' } } } }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "b1a1f0e0-0003-4a01-9a01-000000000003",
+      "name": "Klaviyo — Create VIP Profile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        140,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "from": "={{$env.TWILIO_PHONE_NUMBER}}",
+        "to": "={{ $('Validate & Normalize Lead').item.json.phone }}",
+        "toWhatsapp": false,
+        "message": "Welcome to Cannibus NY! You're locked in as a VIP Founding Member. We'll text you exclusive updates for our New Paltz grand opening.",
+        "options": {}
+      },
+      "id": "b1a1f0e0-0004-4a01-9a01-000000000004",
+      "name": "Twilio — Welcome SMS",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        380,
+        0
+      ],
+      "credentials": {
+        "twilioApi": {
+          "id": "cannibusny-twilio",
+          "name": "Cannibus NY Twilio"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, message: 'Lead logged and SMS triggered' }) }}",
+        "options": {}
+      },
+      "id": "b1a1f0e0-0005-4a01-9a01-000000000005",
+      "name": "Respond 200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        620,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Lead Capture Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate & Normalize Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Normalize Lead": {
+      "main": [
+        [
+          {
+            "node": "Klaviyo — Create VIP Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Klaviyo — Create VIP Profile": {
+      "main": [
+        [
+          {
+            "node": "Twilio — Welcome SMS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Twilio — Welcome SMS": {
+      "main": [
+        [
+          {
+            "node": "Respond 200 OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "active": false,
+  "pinData": {},
+  "tags": [
+    {
+      "name": "cannibusny"
+    },
+    {
+      "name": "lead-capture"
+    }
+  ],
+  "versionId": "1"
+}
