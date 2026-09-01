@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cannibusny — A Homegrown Dispensary in New Paltz, NY</title>
+<meta name="description" content="Cannibusny is a family-rooted, compliant cannabis dispensary working through New York State licensing to open at 56 Main Street, New Paltz, NY.">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Cannibusny — A Homegrown Dispensary in New Paltz, NY">
+<meta property="og:description" content="A family-rooted, compliant cannabis dispensary working through New York State licensing to open at 56 Main Street, New Paltz, NY.">
+<meta property="og:url" content="https://cannibusny.com">
+<meta property="og:image" content="https://cannibusny.com/images/storefront-sign.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Cannibusny — A Homegrown Dispensary in New Paltz, NY">
+<meta name="twitter:description" content="A family-rooted, compliant cannabis dispensary working through New York State licensing to open at 56 Main Street, New Paltz, NY.">
+<meta name="twitter:image" content="https://cannibusny.com/images/storefront-sign.jpg">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Cannibusny",
+  "description": "A family-rooted, compliant cannabis dispensary working through New York State licensing to open on Main Street in New Paltz, NY.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "56 Main Street",
+    "addressLocality": "New Paltz",
+    "addressRegion": "NY",
+    "postalCode": "12561",
+    "addressCountry": "US"
+  },
+  "telephone": "+18444422664",
+  "email": "sheridan@cannibusny.com",
+  "url": "https://cannibusny.com",
+  "image": [
+    "https://cannibusny.com/images/storefront-sign.jpg",
+    "https://cannibusny.com/images/founders-team.jpg"
+  ]
+}
+</script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+  :root {
+    --ink: #14294B;
+    --paper: #FFFFFF;
+    --mist: #EEF2F7;
+    --sage: #6B8F71;
+    --resin: #C98A3E;
+    --ink-soft: #4B5D75;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Spectral', serif;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.15;
+  }
+
+  a { color: inherit; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* Reveal on scroll */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.is-visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* Nav */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--mist);
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 72px; position: relative; }
+  .logo { font-family: 'Spectral', serif; font-weight: 700; font-size: 1.3rem; letter-spacing: -0.01em; }
+  .logo span { color: var(--sage); }
+  nav ul { list-style: none; display: flex; gap: 32px; }
+  nav a { text-decoration: none; font-size: 0.9rem; font-weight: 500; color: var(--ink-soft); transition: color 0.2s; }
+  nav a:hover { color: var(--ink); }
+  .nav-cta {
+    background: var(--ink); color: var(--paper); padding: 10px 20px;
+    border-radius: 4px; font-size: 0.85rem; font-weight: 500; text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .nav-cta:hover { background: var(--sage); transform: translateY(-1px); }
+  .menu-toggle { display: none; background: none; border: none; cursor: pointer; z-index: 60; padding: 8px; }
+  .menu-toggle span { display: block; width: 22px; height: 2px; background: var(--ink); margin: 5px 0; transition: transform 0.25s, opacity 0.25s; }
+  .menu-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .menu-toggle.open span:nth-child(2) { opacity: 0; }
+  .menu-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .mobile-menu {
+    display: none; position: absolute; top: 72px; left: 0; right: 0;
+    background: var(--paper); border-bottom: 1px solid var(--mist);
+    flex-direction: column; padding: 16px 24px 24px;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a { padding: 12px 0; text-decoration: none; color: var(--ink); font-weight: 500; border-bottom: 1px solid var(--mist); }
+
+  /* Hero */
+  .hero { position: relative; padding: 100px 0 80px; overflow: hidden; }
+  .hero-marble { position: absolute; top: -10%; right: -15%; width: 60%; height: 130%; opacity: 0.06; pointer-events: none; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem;
+    color: var(--sage); text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 24px;
+  }
+  .eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--sage); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .hero h1 { font-size: clamp(2.4rem, 5vw, 4rem); max-width: 780px; margin-bottom: 24px; }
+  .hero h1 em { font-style: italic; color: var(--sage); }
+  .hero p.lede { font-size: 1.15rem; color: var(--ink-soft); max-width: 560px; margin-bottom: 40px; }
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+  .btn-primary {
+    background: var(--ink); color: var(--paper); padding: 14px 28px;
+    border-radius: 4px; text-decoration: none; font-weight: 500; font-size: 0.95rem;
+    display: inline-block; transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(20,41,75,0.25); }
+  .btn-ghost {
+    border: 1px solid var(--ink); color: var(--ink); padding: 13px 28px;
+    border-radius: 4px; text-decoration: none; font-weight: 500; font-size: 0.95rem;
+    transition: background 0.2s;
+  }
+  .btn-ghost:hover { background: var(--mist); }
+
+  .marble-divider {
+    height: 3px; width: 100%;
+    background: linear-gradient(90deg, var(--ink) 0%, var(--sage) 35%, var(--resin) 55%, var(--ink) 100%);
+    opacity: 0.85;
+  }
+
+  section { padding: 88px 0; }
+  .section-mist { background: var(--mist); }
+  .eyebrow-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem;
+    color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 16px; display: block;
+  }
+
+  .story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+  .story-grid h2 { font-size: 2.2rem; margin-bottom: 20px; }
+  .story-grid p { color: var(--ink-soft); margin-bottom: 16px; font-size: 1.02rem; }
+  .stat-row { display: flex; gap: 40px; margin-top: 32px; }
+
+  /* Photography */
+  figure { margin: 0; }
+  .photo-frame img {
+    display: block; width: 100%; height: auto;
+    border-radius: 6px; border: 1px solid var(--mist);
+    box-shadow: 0 18px 40px rgba(20,41,75,0.14);
+  }
+  .photo-frame figcaption {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem;
+    color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.08em;
+    margin-top: 12px;
+  }
+  .storefront { padding: 72px 0; }
+  .storefront-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+  .storefront-grid h2 { font-size: 2.2rem; margin-bottom: 20px; }
+  .storefront-grid p { color: var(--ink-soft); margin-bottom: 16px; font-size: 1.02rem; }
+  .storefront-grid .photo-frame img { max-height: 620px; object-fit: cover; object-position: center; }
+  .stat { font-family: 'IBM Plex Mono', monospace; }
+  .stat-num { font-size: 1.8rem; color: var(--ink); font-weight: 500; }
+  .stat-label { font-size: 0.8rem; color: var(--ink-soft); margin-top: 4px; }
+
+  /* Timeline */
+  .timeline-header { text-align: center; max-width: 640px; margin: 0 auto 56px; }
+  .timeline-header h2 { font-size: 2.2rem; margin-bottom: 16px; }
+  .timeline-header p { color: var(--ink-soft); font-size: 1.05rem; }
+  .timeline { display: flex; justify-content: space-between; position: relative; max-width: 780px; margin: 0 auto; }
+  .timeline::before {
+    content: ''; position: absolute; top: 15px; left: 0; right: 0; height: 2px;
+    background: var(--mist); z-index: 0;
+  }
+  .timeline-track {
+    position: absolute; top: 15px; left: 0; height: 2px; background: var(--sage);
+    z-index: 1; width: 0%; transition: width 1.4s ease 0.3s;
+  }
+  .timeline-track.is-visible { width: 62%; }
+  .timeline-step { position: relative; z-index: 2; text-align: center; flex: 1; }
+  .timeline-dot {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--paper);
+    border: 2px solid var(--mist); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: var(--ink-soft);
+  }
+  .timeline-step.done .timeline-dot { background: var(--sage); border-color: var(--sage); color: var(--paper); }
+  .timeline-step.active .timeline-dot { background: var(--resin); border-color: var(--resin); color: var(--paper); }
+  .timeline-step-label { font-size: 0.85rem; font-weight: 500; max-width: 110px; margin: 0 auto; }
+
+  /* FAQ */
+  .faq-wrap { max-width: 720px; margin: 0 auto; }
+  .faq-item { border-bottom: 1px solid var(--mist); }
+  .faq-q {
+    width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+    padding: 22px 0; font-family: 'Spectral', serif; font-size: 1.1rem; font-weight: 600;
+    color: var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  }
+  .faq-icon { font-family: 'IBM Plex Mono', monospace; font-size: 1.2rem; color: var(--sage); transition: transform 0.25s; flex-shrink: 0; }
+  .faq-item.open .faq-icon { transform: rotate(45deg); }
+  .faq-a {
+    max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease;
+    color: var(--ink-soft); font-size: 0.98rem; padding: 0;
+  }
+  .faq-item.open .faq-a { max-height: 240px; padding-bottom: 22px; }
+
+  .values-band { text-align: center; max-width: 720px; margin: 0 auto; }
+  .values-band h2 { font-size: 1.9rem; margin-bottom: 20px; }
+  .values-band p { color: var(--ink-soft); font-size: 1.08rem; }
+
+  footer { background: var(--ink); color: var(--paper); padding: 64px 0 32px; }
+  .footer-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 48px; margin-bottom: 56px; }
+  footer h3 { color: var(--paper); font-family: 'Spectral', serif; font-size: 1.3rem; margin-bottom: 16px; }
+  footer p, footer a { color: #B9C4D6; font-size: 0.92rem; text-decoration: none; }
+  footer a:hover { color: var(--paper); }
+  .footer-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.15); padding-top: 24px;
+    font-size: 0.8rem; color: #8598B2; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+
+  .capture-form { display: flex; gap: 10px; max-width: 400px; margin-top: 16px; }
+  .capture-form input {
+    flex: 1; padding: 12px 14px; border-radius: 4px; border: 1px solid #33456a;
+    background: #1c3358; color: var(--paper); font-family: 'Inter', sans-serif; font-size: 0.9rem;
+  }
+  .capture-form input::placeholder { color: #7f92ac; }
+  .capture-form button {
+    background: var(--resin); color: var(--ink); border: none; padding: 12px 20px;
+    border-radius: 4px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: filter 0.2s;
+  }
+  .capture-form button:hover { filter: brightness(1.08); }
+  .form-msg { font-size: 0.82rem; color: var(--sage); margin-top: 10px; min-height: 1em; }
+
+  @media (max-width: 860px) {
+    nav ul { display: none; }
+    .menu-toggle { display: block; }
+    .story-grid { grid-template-columns: 1fr; gap: 32px; }
+    .storefront-grid { grid-template-columns: 1fr; gap: 32px; }
+    .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+    .stat-row { gap: 28px; }
+    section { padding: 64px 0; }
+    .timeline { flex-wrap: wrap; gap: 24px 0; }
+    .timeline::before, .timeline-track { display: none; }
+    .timeline-step { flex: 0 0 50%; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo">cannibus<span>ny</span></div>
+    <ul>
+      <li><a href="#story">Our Story</a></li>
+      <li><a href="#timeline">Our Path</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#values">What We Stand For</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Get updates</a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu"><span></span><span></span><span></span></button>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#story">Our Story</a>
+      <a href="#timeline">Our Path</a>
+      <a href="#faq">FAQ</a>
+      <a href="#values">What We Stand For</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <svg class="hero-marble" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">
+    <path d="M40 60 C120 20, 200 100, 160 180 C120 260, 260 240, 280 340 C300 440, 180 460, 120 420 C60 380, 20 300, 60 220 C100 140, -20 120, 40 60 Z" fill="#14294B"/>
+    <path d="M180 40 C260 60, 320 140, 280 220 C240 300, 340 320, 320 400" stroke="#C98A3E" stroke-width="3" fill="none"/>
+    <path d="M100 100 C160 140, 140 220, 200 260 C260 300, 240 380, 180 420" stroke="#6B8F71" stroke-width="2" fill="none"/>
+  </svg>
+  <div class="wrap">
+    <div class="eyebrow">New Paltz, NY · 56 Main Street</div>
+    <h1>A homegrown dispensary, <em>built by the people who'll run it.</em></h1>
+    <p class="lede">Cannibusny is a family-rooted business working through New York's licensing process to open a compliant, community-first dispensary right on Main Street — not a chain, not an outside operator, just neighbors building something for their own town.</p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-primary">Get opening updates</a>
+      <a href="#story" class="btn-ghost">Our story</a>
+    </div>
+  </div>
+</header>
+
+<div class="marble-divider"></div>
+
+<section id="story">
+  <div class="wrap story-grid">
+    <div class="reveal">
+      <span class="eyebrow-label">Who we are</span>
+      <h2>Fifteen years of showing up for this community, before this was ever a business plan.</h2>
+      <p>Cannibusny is led by a founder with over fifteen years in substance abuse counseling and case management — work that means understanding people, not just product. That background shapes how this business is being built: carefully, compliantly, and with the neighborhood in mind first.</p>
+      <p>This isn't a venture built to flip. It's a family undertaking — the kind meant to be handed down, rooted in New Paltz, and run by people who already call this community home.</p>
+    </div>
+    <div class="reveal reveal-delay-2">
+      <div class="stat-row">
+        <div class="stat"><div class="stat-num" data-count="15">0</div><div class="stat-label">Years in community &amp; counseling work</div></div>
+        <div class="stat"><div class="stat-num" data-count="56">0</div><div class="stat-label">Main Street, New Paltz</div></div>
+        <div class="stat"><div class="stat-num" data-count="1">0</div><div class="stat-label">Family-run, from the start</div></div>
+      </div>
+      <p style="margin-top:32px;">We're currently working through New York State's licensing process. It's a long road — and we're walking every step of it the right way.</p>
+      <figure class="photo-frame" style="margin-top:32px;">
+        <img src="images/founders-team.jpg" width="1159" height="1159" loading="lazy" decoding="async"
+             alt="The Cannibusny family team together at the counter of their New Paltz storefront.">
+        <figcaption>The family behind Cannibusny — New Paltz, NY</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="storefront">
+  <div class="wrap storefront-grid">
+    <figure class="photo-frame reveal">
+      <img src="images/storefront-sign.jpg" width="1050" height="1400" loading="lazy" decoding="async"
+           alt="The Cannibus NY hanging sign outside 56 Main Street in New Paltz, New York.">
+      <figcaption>56 Main Street, New Paltz</figcaption>
+    </figure>
+    <div class="reveal reveal-delay-2">
+      <span class="eyebrow-label">The location</span>
+      <h2>Our sign is already up on Main Street.</h2>
+      <p>The building at 56 Main Street is ours, the sign is hanging, and the buildout is underway — a few doors down from the shops and restaurants New Paltz already knows.</p>
+      <p>When licensing clears, we open here. Put your number on the list and you'll hear it from us first.</p>
+      <a href="#contact" class="btn-primary">Get opening updates</a>
+    </div>
+  </div>
+</section>
+
+<section id="timeline" class="section-mist">
+  <div class="wrap">
+    <div class="timeline-header reveal">
+      <span class="eyebrow-label">Our path to opening</span>
+      <h2>Every step, done the right way.</h2>
+      <p>New York's licensing process is long by design. Here's where we stand.</p>
+    </div>
+    <div class="timeline reveal">
+      <div class="timeline-track" id="timelineTrack"></div>
+      <div class="timeline-step done"><div class="timeline-dot">✓</div><div class="timeline-step-label">Application Submitted</div></div>
+      <div class="timeline-step done"><div class="timeline-dot">✓</div><div class="timeline-step-label">Community Review</div></div>
+      <div class="timeline-step active"><div class="timeline-dot">●</div><div class="timeline-step-label">Licensing Process</div></div>
+      <div class="timeline-step"><div class="timeline-dot">4</div><div class="timeline-step-label">Build-Out</div></div>
+      <div class="timeline-step"><div class="timeline-dot">5</div><div class="timeline-step-label">Grand Opening</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap faq-wrap">
+    <div class="timeline-header reveal">
+      <span class="eyebrow-label">Questions</span>
+      <h2>What people ask us most</h2>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q"><span>When will Cannibusny open?</span><span class="faq-icon">+</span></button>
+      <div class="faq-a">We're still working through New York State's licensing process. There's no confirmed opening date yet — get on the list below and you'll be the first to know when that changes.</div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q"><span>Where will you be located?</span><span class="faq-icon">+</span></button>
+      <div class="faq-a">56 Main Street, New Paltz, NY 12561 — right in the heart of town.</div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q"><span>Who's behind Cannibusny?</span><span class="faq-icon">+</span></button>
+      <div class="faq-a">A local, family-run team led by a founder with over fifteen years in substance abuse counseling and community case management.</div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q"><span>How can I stay updated?</span><span class="faq-icon">+</span></button>
+      <div class="faq-a">Drop your email in the form at the bottom of this page — we'll only reach out when there's something real to share.</div>
+    </div>
+  </div>
+</section>
+
+<section id="values" class="section-mist">
+  <div class="wrap values-band reveal">
+    <span class="eyebrow-label">What we stand for</span>
+    <h2>A fair shot, for the businesses that play it straight.</h2>
+    <p>We believe small, local, fully-compliant applicants deserve a genuine and fair path to opening — not just the operators with the deepest pockets. That belief is what got us this far, and it's what we're standing on until the doors open.</p>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h3>cannibusny</h3>
+        <p style="max-width:280px; margin-top:8px;">56 Main Street<br>New Paltz, NY 12561</p>
+        <form class="capture-form" id="notifyForm">
+          <input type="email" placeholder="Your email" aria-label="Email address" id="notifyEmail" required>
+          <button type="submit">Notify me</button>
+        </form>
+        <div class="form-msg" id="formMsg"></div>
+      </div>
+      <div>
+        <h3 style="font-size:1rem; font-family:'Inter',sans-serif; font-weight:600;">Contact</h3>
+        <ul class="footer-list">
+          <li><a href="mailto:sheridan@cannibusny.com">sheridan@cannibusny.com</a></li>
+          <li><a href="tel:+18444422664">(844) 44-CANNI</a></li>
+          <li><a href="tel:+18456610922">(845) 661-0922</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:1rem; font-family:'Inter',sans-serif; font-weight:600;">Explore</h3>
+        <ul class="footer-list">
+          <li><a href="#story">Our Story</a></li>
+          <li><a href="#timeline">Our Path</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#values">What We Stand For</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Cannibusny. New Paltz, NY.</span>
+      <span>Site in progress — more coming soon.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Mobile menu
+  var menuToggle = document.getElementById('menuToggle');
+  var mobileMenu = document.getElementById('mobileMenu');
+  menuToggle.addEventListener('click', function() {
+    menuToggle.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+  mobileMenu.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      menuToggle.classList.remove('open');
+      mobileMenu.classList.remove('open');
+    });
+  });
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-q').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      btn.parentElement.classList.toggle('open');
+    });
+  });
+
+  // Scroll reveal + counters + timeline
+  var revealEls = document.querySelectorAll('.reveal');
+  var countersStarted = false;
+  var timelineStarted = false;
+
+  function animateCounters() {
+    document.querySelectorAll('.stat-num').forEach(function(el) {
+      var target = parseInt(el.getAttribute('data-count'), 10);
+      var current = 0;
+      var step = Math.max(1, Math.ceil(target / 30));
+      var interval = setInterval(function() {
+        current += step;
+        if (current >= target) { current = target; clearInterval(interval); }
+        el.textContent = current;
+      }, 30);
+    });
+  }
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        if (entry.target.querySelector('.stat-num') && !countersStarted) {
+          countersStarted = true;
+          animateCounters();
+        }
+      }
+    });
+  }, { threshold: 0.2 });
+  revealEls.forEach(function(el) { observer.observe(el); });
+
+  var timelineObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !timelineStarted) {
+        timelineStarted = true;
+        document.getElementById('timelineTrack').classList.add('is-visible');
+      }
+    });
+  }, { threshold: 0.3 });
+  timelineObserver.observe(document.getElementById('timeline'));
+
+  // Email capture (front-end only for now — needs a real backend to actually collect)
+  document.getElementById('notifyForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    document.getElementById('formMsg').textContent = "Thanks — we'll keep you posted.";
+    document.getElementById('notifyEmail').value = '';
+  });
+</script>
+
+</body>
+</html>
