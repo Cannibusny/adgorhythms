@@ -1,0 +1,176 @@
+{
+  "name": "Cannibus NY — Weekly SEO Blog Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "c2b2f0e0-0001-4a01-9a01-000000000001",
+      "name": "Every Monday 8:00 AM EST",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -340,
+        0
+      ],
+      "notes": "Set the workflow timezone to America/New_York in workflow settings so 08:00 resolves to EST/EDT."
+    },
+    {
+      "parameters": {
+        "jsCode": "const topics = [\n  'How New Paltz locals can read a cannabis COA before they buy',\n  'Terpene basics: choosing strains for Hudson Valley hikes',\n  'Edibles dosing 101 for first-time New York customers',\n  'What New York State legal dispensary licensing means for shoppers',\n  'Storing cannabis through Hudson Valley humidity and cold snaps'\n];\nconst week = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));\nreturn [{ json: { topic: topics[week % topics.length] } }];"
+      },
+      "id": "c2b2f0e0-0002-4a01-9a01-000000000002",
+      "name": "Pick Weekly Topic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -120,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.OPENAI_API_KEY}}"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'gpt-4o-mini', temperature: 0.6, response_format: { type: 'json_object' }, messages: [ { role: 'system', content: 'You are an SEO content writer for Cannibus NY, a legal retail cannabis dispensary in New Paltz, New York. Write compliant, educational content. Never make medical claims and never target minors. Respond with JSON containing the keys title, metaDescription and bodyHtml.' }, { role: 'user', content: 'Write a 600-word educational article for local New Paltz, NY readers about: ' + $json.topic + '. Use H2 subheadings, mention New Paltz and the Hudson Valley naturally for local SEO, and end with a soft call to visit Cannibus NY. Return JSON with title, metaDescription (max 155 chars) and bodyHtml (valid HTML).' } ] }) }}",
+        "options": {}
+      },
+      "id": "c2b2f0e0-0003-4a01-9a01-000000000003",
+      "name": "OpenAI — Draft 600-Word Article",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        120,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.choices?.[0]?.message?.content ?? '{}';\nconst article = JSON.parse(raw);\nif (!article.title || !article.bodyHtml) {\n  throw new Error('OpenAI response missing title or bodyHtml');\n}\nreturn [{ json: { title: article.title, metaDescription: article.metaDescription ?? '', bodyHtml: article.bodyHtml } }];"
+      },
+      "id": "c2b2f0e0-0004-4a01-9a01-000000000004",
+      "name": "Parse Article JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        360,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.CMS_API_ENDPOINT}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.CMS_BEARER_TOKEN}}"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ status: 'draft', title: $json.title, excerpt: $json.metaDescription, content: $json.bodyHtml }) }}",
+        "options": {}
+      },
+      "id": "c2b2f0e0-0005-4a01-9a01-000000000005",
+      "name": "CMS — Create Draft Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Every Monday 8:00 AM EST": {
+      "main": [
+        [
+          {
+            "node": "Pick Weekly Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Weekly Topic": {
+      "main": [
+        [
+          {
+            "node": "OpenAI — Draft 600-Word Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI — Draft 600-Word Article": {
+      "main": [
+        [
+          {
+            "node": "Parse Article JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Article JSON": {
+      "main": [
+        [
+          {
+            "node": "CMS — Create Draft Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveManualExecutions": true
+  },
+  "active": false,
+  "pinData": {},
+  "tags": [
+    {
+      "name": "cannibusny"
+    },
+    {
+      "name": "seo"
+    }
+  ],
+  "versionId": "1"
+}
