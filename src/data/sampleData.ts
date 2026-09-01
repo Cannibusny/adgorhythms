@@ -17,7 +17,6 @@ export const DEFAULT_AGENCY: AgencySettings = {
   email: 'sheridan@adgorhythms.com',
   phone: '(845) 555-0142',
   website: 'adgorhythms.com',
-  apiKey: '',
   monthlyGoal: 10000,
   dailyOutreachGoal: 5,
   weeklyCallGoal: 2,

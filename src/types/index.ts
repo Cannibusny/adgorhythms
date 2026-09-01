@@ -141,7 +141,6 @@ export interface AgencySettings {
   email: string;
   phone: string;
   website: string;
-  apiKey: string;
   monthlyGoal: number;
   dailyOutreachGoal: number;
   weeklyCallGoal: number;

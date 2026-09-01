@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import {
   Phone, Calendar, Copy, Sparkles, Loader2, AlertCircle,
-  Plus, X, CheckCircle, Clock, ChevronDown,
+  Plus, X, Clock,
 } from 'lucide-react';
 import { storage, generateId } from '../lib/storage';
+import { claudeGenerate } from '../lib/claude';
 import { useToast } from '../hooks/useToast';
 import type { Client, Call, CallOutcome, PackageTier } from '../types';
 
@@ -20,7 +21,7 @@ const CALL_SCRIPT = [
   { time: '15-17 min', label: 'Close', desc: 'Ask: "Does this feel like the right next step for you?" Book follow-up or get verbal yes right now.', color: 'bg-[#FF6B35]/5 border-[#FF6B35]/20' },
 ];
 
-async function generateCallPrep(client: Client, apiKey: string): Promise<string> {
+async function generateCallPrep(client: Client): Promise<string> {
   const prompt = `You are preparing Sheridan Williams for a discovery call with a potential ADgorhythms client.
 
 Sheridan is a 65-year-old Black entrepreneur running an AI marketing agency in Hudson Valley NY. He is warm, direct, experienced, and authentic. He does not use tech jargon. He speaks plainly.
@@ -42,27 +43,7 @@ Generate a discovery call prep brief including:
 
 Keep it conversational. Sheridan reads this right before the call. Make it scannable. Use clear section headers. Write in plain English, no bullet symbols needed.`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1500,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error((err as { error?: { message?: string } }).error?.message || 'API request failed');
-  }
-
-  const data = await response.json() as { content: Array<{ text: string }> };
-  return data.content[0]?.text ?? '';
+  return claudeGenerate([{ role: 'user', content: prompt }], 1500);
 }
 
 interface AddCallModalProps {
@@ -308,8 +289,6 @@ export default function DiscoveryCallPrep() {
     ? clients.find((c) => c.id === selectedCall.clientId)
     : null;
 
-  const agency = storage.getAgency();
-
   const copyCalendly = () => {
     navigator.clipboard.writeText(CALENDLY_URL);
     addToast('Calendly link copied!', 'success');
@@ -318,11 +297,6 @@ export default function DiscoveryCallPrep() {
   const handleGenerate = async () => {
     if (!selectedClient && !selectedCall) {
       addToast('Select a call first', 'warning');
-      return;
-    }
-    const apiKey = agency?.apiKey;
-    if (!apiKey) {
-      addToast('Add your Claude API key in Settings first', 'error');
       return;
     }
 
@@ -352,7 +326,7 @@ export default function DiscoveryCallPrep() {
     setError('');
     setPrepBrief('');
     try {
-      const text = await generateCallPrep(client, apiKey);
+      const text = await generateCallPrep(client);
       setPrepBrief(text);
       if (selectedCallId) {
         storage.updateCall(selectedCallId, { prepBrief: text });

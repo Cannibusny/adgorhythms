@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
   Users, FileText, DollarSign, TrendingUp, Phone,
-  Target, CheckSquare, Square, ArrowRight, Circle,
-  Zap, Trophy, Activity as ActivityIcon, ChevronRight,
+  Target, CheckSquare, Square, Circle,
+  Zap, Trophy, Activity as ActivityIcon,
 } from 'lucide-react';
 import { storage, generateId } from '../lib/storage';
 import { useToast } from '../hooks/useToast';

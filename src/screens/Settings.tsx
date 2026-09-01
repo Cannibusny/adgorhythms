@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  Settings2, User, DollarSign, Mail, Copy, Eye, EyeOff,
-  Package, Key, Target, Calendar, Globe, Phone,
+  User, Mail, Copy, Package, Target,
 } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { useToast } from '../hooks/useToast';
@@ -16,7 +15,6 @@ const DEFAULT_AGENCY: AgencySettings = {
   email: 'sheridan@adgorhythms.com',
   phone: '(845) 555-0142',
   website: 'adgorhythms.com',
-  apiKey: '',
   monthlyGoal: 10000,
   dailyOutreachGoal: 5,
   weeklyCallGoal: 2,
@@ -73,7 +71,6 @@ export default function Settings() {
   const { addToast } = useToast();
   const [settings, setSettings] = useState<AgencySettings>(DEFAULT_AGENCY);
   const [packages, setPackages] = useState<PackageConfig[]>(PACKAGES);
-  const [showApiKey, setShowApiKey] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -181,40 +178,6 @@ https://${settings.calendlyLink}`;
               </div>
             </Field>
           </div>
-        </div>
-      </Section>
-
-      <Section title="API Configuration" icon={Key}>
-        <div className="space-y-4">
-          <div className="bg-[#F8F7FF] rounded-xl p-4 text-sm text-gray-600">
-            Your Claude API key powers the AI proposal generator and discovery call prep. Get yours at console.anthropic.com
-          </div>
-          <Field label="Anthropic API Key">
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <input
-                  type={showApiKey ? 'text' : 'password'}
-                  value={settings.apiKey}
-                  onChange={(e) => set('apiKey', e.target.value)}
-                  placeholder="sk-ant-..."
-                  className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#6C47FF]/30 focus:border-[#6C47FF] font-mono"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowApiKey(!showApiKey)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
-          </Field>
-          {settings.apiKey && (
-            <div className="flex items-center gap-2 text-sm text-[#00C896]">
-              <div className="w-2 h-2 rounded-full bg-[#00C896]" />
-              API key configured
-            </div>
-          )}
         </div>
       </Section>
 
