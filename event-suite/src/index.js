@@ -39,6 +39,30 @@ app.use(helmet({
 }));
 app.use(cors());
 app.use(morgan('short'));
+
+// Stripe webhook MUST be before express.json() to preserve raw body for signature verification
+app.post('/webhook/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return res.status(400).send('Stripe not configured');
+  }
+  const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+  const sig = req.headers['stripe-signature'];
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    if (session.payment_status === 'paid') {
+      console.log('Stripe webhook confirmed payment:', session.id);
+    }
+  }
+  res.json({ received: true });
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -68,6 +92,12 @@ app.use('/settings/klaviyo', klaviyoRoutes);
 app.use('/api', statusRoutes);
 app.use('/events', eventRoutes);
 app.use('/checkin', checkinRoutes);
+
+// Support /auth/meta/callback redirect (maps to /oauth/meta/callback)
+app.get('/auth/meta/callback', (req, res) => {
+  const qs = new URLSearchParams(req.query).toString();
+  res.redirect(`/oauth/meta/callback${qs ? '?' + qs : ''}`);
+});
 
 // Root redirect
 app.get('/', (_req, res) => {

@@ -1,145 +1,205 @@
-<% var title = 'Check-In — ' + event.name; %>
-<%- include('layout', { body: `
-  <div style="text-align: center; margin-bottom: 1.5rem;">
-    <h1>Check-In</h1>
-    <h2>${event.name}</h2>
-  </div>
+<%- include('layout-start', { title: 'Check-In — ' + event.name, promoter: promoter }) %>
 
-  <div class="card" style="padding: 2rem; text-align: center;">
-    <div id="scanner-area" style="margin-bottom: 1rem;">
-      <video id="camera-feed" style="width: 100%; max-width: 400px; border-radius: 12px; display: none;" autoplay playsinline></video>
-      <canvas id="scan-canvas" style="display: none;"></canvas>
-    </div>
+<div style="text-align: center; margin-bottom: 1.5rem;">
+  <h1>Check-In</h1>
+  <h2><%= event.name %></h2>
+</div>
 
-    <button id="scan-btn" class="btn btn-primary" style="width: 100%; padding: 1.25rem; font-size: 1.25rem; margin-bottom: 1rem;" onclick="startScanner()">
-      📷 Scan Ticket
-    </button>
+<!-- Result Display -->
+<div id="resultBox" style="display: none; padding: 2rem; border-radius: 16px; text-align: center; margin-bottom: 1.5rem; transition: all 0.3s;">
+  <div id="resultIcon" style="font-size: 4rem; margin-bottom: 0.5rem;"></div>
+  <div id="resultMessage" style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem;"></div>
+  <div id="resultDetails" style="font-size: 1rem; color: var(--text-muted);"></div>
+</div>
 
-    <div style="margin: 1.5rem 0; color: var(--text-muted); font-size: 0.85rem;">— or enter code manually —</div>
-
-    <form id="manual-form" onsubmit="verifyManual(event); return false;" style="display: flex; gap: 0.5rem;">
-      <input type="text" id="manual-code" placeholder="Enter ticket code" style="flex: 1; margin-bottom: 0;" />
-      <button type="submit" class="btn btn-primary">Verify</button>
-    </form>
-
-    <div id="result" style="margin-top: 1.5rem; display: none;">
-      <div id="result-icon" style="font-size: 4rem;"></div>
-      <div id="result-msg" style="font-size: 1.25rem; font-weight: 600; margin-top: 0.5rem;"></div>
-      <div id="result-detail" style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem;"></div>
+<!-- QR Scanner -->
+<div class="card" style="padding: 1.5rem; text-align: center; margin-bottom: 1rem;">
+  <button id="scanBtn" onclick="startScanner()" class="btn btn-primary" style="width: 100%; padding: 1.25rem; font-size: 1.2rem; border-radius: 12px;">
+    SCAN TICKET
+  </button>
+  <div id="scannerContainer" style="display: none; margin-top: 1rem;">
+    <div id="qr-reader" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
+    <div style="margin-top: 0.75rem;">
+      <button onclick="stopScanner()" class="btn btn-danger btn-sm">Stop Camera</button>
     </div>
   </div>
+</div>
 
-  <div style="text-align: center; margin-top: 1rem;">
-    <a href="/events/${event.id}/admin" style="color: var(--text-muted); text-decoration: none;">← Back to Admin Dashboard</a>
+<!-- Manual Entry -->
+<div class="card" style="padding: 1.5rem; margin-bottom: 1rem;">
+  <h3 style="margin-bottom: 0.75rem; text-align: center;">Manual Lookup</h3>
+  <form id="manualForm" onsubmit="manualCheckIn(event); return false;">
+    <input type="text" id="manualInput" placeholder="Enter name, email, or ticket code" style="font-size: 1.1rem; padding: 0.9rem 1rem; text-align: center; margin-bottom: 0.75rem;" />
+    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.9rem; font-size: 1.1rem;">Check In</button>
+  </form>
+</div>
+
+<!-- Quick Stats -->
+<div class="stat-grid" style="grid-template-columns: 1fr 1fr;">
+  <div class="stat-card">
+    <div class="stat-number" style="color: var(--success);" id="liveCheckedIn">-</div>
+    <div class="stat-label">Checked In</div>
   </div>
+  <div class="stat-card">
+    <div class="stat-number" style="color: var(--accent);" id="liveTotalSold">-</div>
+    <div class="stat-label">Total Sold</div>
+  </div>
+</div>
 
-  <script>
-    let scanning = false;
-    let stream = null;
+<!-- Recent Check-ins -->
+<div class="card" style="padding: 1rem;">
+  <h3 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">Recent Check-Ins</h3>
+  <div id="recentList" style="max-height: 200px; overflow-y: auto;"></div>
+</div>
 
-    async function startScanner() {
-      const btn = document.getElementById('scan-btn');
-      const video = document.getElementById('camera-feed');
+<div style="text-align: center; margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+  <a href="/events/<%= event.id %>/admin" style="color: var(--text-muted); text-decoration: none;">&larr; Admin Dashboard</a>
+  <a href="/events/<%= event.id %>/live" style="color: var(--accent); text-decoration: none;">Live Dashboard &rarr;</a>
+</div>
 
-      if (scanning) {
-        stopScanner();
-        return;
-      }
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+var eventId = '<%= event.id %>';
+var scanner = null;
+var scannerRunning = false;
+var lastScanTime = 0;
 
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }
-        });
-        video.srcObject = stream;
-        video.style.display = 'block';
-        btn.textContent = '⏹️ Stop Scanner';
-        scanning = true;
-        scanFrame();
-      } catch (err) {
-        alert('Camera access denied. Use manual entry instead.');
-      }
+function showResult(valid, message, details) {
+  var box = document.getElementById('resultBox');
+  var icon = document.getElementById('resultIcon');
+  var msg = document.getElementById('resultMessage');
+  var det = document.getElementById('resultDetails');
+  box.style.display = 'block';
+  if (valid) {
+    box.style.background = 'rgba(0,184,148,0.15)';
+    box.style.border = '2px solid var(--success)';
+    icon.textContent = '\u2705';
+    msg.style.color = 'var(--success)';
+  } else {
+    box.style.background = 'rgba(231,76,60,0.15)';
+    box.style.border = '2px solid var(--error)';
+    icon.textContent = '\u274C';
+    msg.style.color = 'var(--error)';
+  }
+  msg.textContent = message;
+  det.textContent = details || '';
+  setTimeout(function() { box.style.display = 'none'; }, 5000);
+}
+
+function doVerify(data) {
+  fetch('/events/' + eventId + '/checkin/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(res) {
+    var details = '';
+    if (res.buyer) {
+      details = res.buyer + (res.tier ? ' — ' + res.tier : '') + (res.email ? ' (' + res.email + ')' : '');
     }
+    showResult(res.valid, res.message, details);
+    if (res.valid) refreshStats();
+  })
+  .catch(function(err) {
+    showResult(false, 'Network error', err.message);
+  });
+}
 
-    function stopScanner() {
-      const video = document.getElementById('camera-feed');
-      const btn = document.getElementById('scan-btn');
-      if (stream) {
-        stream.getTracks().forEach(t => t.stop());
-        stream = null;
-      }
-      video.style.display = 'none';
-      btn.textContent = '📷 Scan Ticket';
-      scanning = false;
+function startScanner() {
+  var container = document.getElementById('scannerContainer');
+  container.style.display = 'block';
+  document.getElementById('scanBtn').style.display = 'none';
+
+  scanner = new Html5Qrcode('qr-reader');
+  scannerRunning = true;
+
+  Html5Qrcode.getCameras().then(function(cameras) {
+    if (!cameras || cameras.length === 0) {
+      showResult(false, 'No cameras found', 'Check camera permissions');
+      return;
     }
+    var cameraId = cameras.length > 1 ? cameras[cameras.length - 1].id : cameras[0].id;
+    scanner.start(
+      cameraId,
+      { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+      function(decodedText) {
+        var now = Date.now();
+        if (now - lastScanTime < 3000) return;
+        lastScanTime = now;
 
-    function scanFrame() {
-      if (!scanning) return;
-      const video = document.getElementById('camera-feed');
-      const canvas = document.getElementById('scan-canvas');
-      const ctx = canvas.getContext('2d');
+        var ticketCode = decodedText;
+        try {
+          var parsed = JSON.parse(decodedText);
+          ticketCode = parsed.ticketCode || parsed.code || decodedText;
+        } catch(e) { /* not JSON, use raw */ }
 
-      if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-        // QR scanning would need a JS library like jsQR
-        // For now, we rely on manual entry or native camera scan
+        doVerify({ ticketCode: ticketCode });
       }
-      requestAnimationFrame(scanFrame);
+    ).catch(function(err) {
+      showResult(false, 'Camera error', err.message || 'Could not access camera');
+    });
+  }).catch(function() {
+    showResult(false, 'No cameras found', 'Check camera permissions');
+  });
+}
+
+function stopScanner() {
+  if (scanner && scannerRunning) {
+    scanner.stop().then(function() {
+      scannerRunning = false;
+      document.getElementById('scannerContainer').style.display = 'none';
+      document.getElementById('scanBtn').style.display = 'block';
+    }).catch(function() {});
+  }
+}
+
+function manualCheckIn(e) {
+  e.preventDefault();
+  var val = document.getElementById('manualInput').value.trim();
+  if (!val) return;
+
+  var ticketCode = val;
+  try {
+    var parsed = JSON.parse(val);
+    ticketCode = parsed.ticketCode || parsed.code || val;
+    doVerify({ ticketCode: ticketCode });
+  } catch(ex) {
+    if (/^[a-f0-9]{24,}$/i.test(val)) {
+      doVerify({ ticketCode: val });
+    } else {
+      doVerify({ searchQuery: val });
     }
+  }
+  document.getElementById('manualInput').value = '';
+}
 
-    async function verifyManual(e) {
-      if (e && e.preventDefault) e.preventDefault();
-      const code = document.getElementById('manual-code').value.trim();
-      if (!code) return;
+function refreshStats() {
+  fetch('/events/' + eventId + '/stats')
+    .then(function(r) { return r.json(); })
+    .then(function(s) {
+      document.getElementById('liveCheckedIn').textContent = s.checked_in || 0;
+      document.getElementById('liveTotalSold').textContent = s.total_sold || 0;
+    }).catch(function() {});
 
-      // Try to parse as JSON (QR code data) or use as raw ticket code
-      let ticketCode = code;
-      try {
-        const parsed = JSON.parse(code);
-        if (parsed.ticketCode) ticketCode = parsed.ticketCode;
-      } catch (_) {}
-
-      const res = await fetch('/events/${event.id}/checkin/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticketCode })
+  fetch('/events/' + eventId + '/recent')
+    .then(function(r) { return r.json(); })
+    .then(function(list) {
+      var html = '';
+      list.forEach(function(a) {
+        var time = a.checked_in_at ? new Date(a.checked_in_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+        var tierColor = a.tier_name === 'VIP' ? 'var(--gold)' : a.tier_name === 'Student' ? 'var(--success)' : 'var(--text-muted)';
+        html += '<div style="padding: 0.4rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 0.85rem;">';
+        html += '<span>' + a.buyer_name + ' <span style="color: ' + tierColor + ';">' + (a.tier_name || 'General') + '</span></span>';
+        html += '<span style="color: var(--text-muted);">' + time + '</span>';
+        html += '</div>';
       });
+      document.getElementById('recentList').innerHTML = html || '<p style="color: var(--text-muted); text-align: center;">No check-ins yet</p>';
+    }).catch(function() {});
+}
 
-      const data = await res.json();
-      showResult(data);
-      document.getElementById('manual-code').value = '';
-    }
+refreshStats();
+setInterval(refreshStats, 5000);
+</script>
 
-    function showResult(data) {
-      const el = document.getElementById('result');
-      const icon = document.getElementById('result-icon');
-      const msg = document.getElementById('result-msg');
-      const detail = document.getElementById('result-detail');
-
-      el.style.display = 'block';
-
-      if (data.valid) {
-        icon.textContent = '✅';
-        msg.textContent = data.message;
-        msg.style.color = 'var(--success)';
-        detail.textContent = data.buyer + ' (' + data.email + ')';
-        el.style.background = 'rgba(0,184,148,0.05)';
-        el.style.borderRadius = '12px';
-        el.style.padding = '1.5rem';
-      } else {
-        icon.textContent = '❌';
-        msg.textContent = data.message;
-        msg.style.color = 'var(--error)';
-        detail.textContent = '';
-        el.style.background = 'rgba(231,76,60,0.05)';
-        el.style.borderRadius = '12px';
-        el.style.padding = '1.5rem';
-      }
-
-      setTimeout(() => {
-        el.style.display = 'none';
-      }, 5000);
-    }
-  </script>
-` }) %>
+<%- include('layout-end', { registerSW: true }) %>

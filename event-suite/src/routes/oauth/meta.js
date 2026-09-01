@@ -8,22 +8,59 @@ const router = express.Router();
 
 const META_GRAPH_VERSION = 'v19.0';
 
+// Multi-app support: App 1 (primary) and App 2 (secondary)
+function getAppConfig(appIndex) {
+  if (appIndex === 2) {
+    return {
+      appId: process.env.META_APP_ID_2 || '839208479236707',
+      appSecret: process.env.META_APP_SECRET_2 || process.env.META_APP_SECRET,
+      platform: 'meta_2',
+    };
+  }
+  return {
+    appId: process.env.META_APP_ID || '1716775929500494',
+    appSecret: process.env.META_APP_SECRET,
+    platform: 'meta',
+  };
+}
+
+// Connect with App 1 (default)
 router.get('/connect', requireAuth, (req, res) => {
+  const appIndex = parseInt(req.query.app, 10) || 1;
+  const config = getAppConfig(appIndex);
   const redirectUri = `${process.env.BASE_URL}/oauth/meta/callback`;
   const scope = 'ads_management,ads_read,business_management';
+  const state = JSON.stringify({ app: appIndex });
   const authUrl =
     `https://www.facebook.com/${META_GRAPH_VERSION}/dialog/oauth` +
-    `?client_id=${process.env.META_APP_ID}` +
+    `?client_id=${config.appId}` +
     `&redirect_uri=${encodeURIComponent(redirectUri)}` +
     `&scope=${scope}` +
+    `&state=${encodeURIComponent(state)}` +
     '&response_type=code';
   res.redirect(authUrl);
 });
 
-router.get('/callback', requireAuth, async (req, res) => {
-  const { code, error } = req.query;
+// Also support /auth/meta/callback redirect
+router.get('/callback', requireAuth, handleCallback);
+
+async function handleCallback(req, res) {
+  const { code, error, state } = req.query;
   if (error) {
     console.error('Meta OAuth error:', error);
+    return res.redirect('/dashboard?meta=error');
+  }
+
+  let appIndex = 1;
+  try {
+    const parsed = JSON.parse(state || '{}');
+    appIndex = parsed.app || 1;
+  } catch (_e) { /* default to app 1 */ }
+
+  const config = getAppConfig(appIndex);
+
+  if (!config.appSecret) {
+    console.error('Meta app secret not configured for app', appIndex);
     return res.redirect('/dashboard?meta=error');
   }
 
@@ -33,8 +70,8 @@ router.get('/callback', requireAuth, async (req, res) => {
       `https://graph.facebook.com/${META_GRAPH_VERSION}/oauth/access_token`,
       {
         params: {
-          client_id: process.env.META_APP_ID,
-          client_secret: process.env.META_APP_SECRET,
+          client_id: config.appId,
+          client_secret: config.appSecret,
           redirect_uri: redirectUri,
           code,
         },
@@ -43,14 +80,13 @@ router.get('/callback', requireAuth, async (req, res) => {
 
     const { access_token: shortLivedToken } = tokenResponse.data;
 
-    // Exchange for long-lived token (60 days)
     const longLivedResponse = await axios.get(
       `https://graph.facebook.com/${META_GRAPH_VERSION}/oauth/access_token`,
       {
         params: {
           grant_type: 'fb_exchange_token',
-          client_id: process.env.META_APP_ID,
-          client_secret: process.env.META_APP_SECRET,
+          client_id: config.appId,
+          client_secret: config.appSecret,
           fb_exchange_token: shortLivedToken,
         },
       }
@@ -59,7 +95,6 @@ router.get('/callback', requireAuth, async (req, res) => {
     const { access_token: longLivedToken, expires_in } = longLivedResponse.data;
     const expiresAt = new Date(Date.now() + (expires_in || 5184000) * 1000);
 
-    // Fetch ad accounts
     let accountId = null;
     try {
       const accountsResponse = await axios.get(
@@ -78,11 +113,11 @@ router.get('/callback', requireAuth, async (req, res) => {
 
     await db.query(
       `INSERT INTO credentials (promoter_id, platform, access_token, token_expires_at, account_id, status)
-       VALUES ($1, 'meta', $2, $3, $4, 'active')
+       VALUES ($1, $2, $3, $4, $5, 'active')
        ON CONFLICT (promoter_id, platform)
-       DO UPDATE SET access_token = $2, token_expires_at = $3, account_id = $4,
+       DO UPDATE SET access_token = $3, token_expires_at = $4, account_id = $5,
                      status = 'active', last_refreshed_at = NOW()`,
-      [promoterId, encryptedAccessToken, expiresAt, accountId]
+      [promoterId, config.platform, encryptedAccessToken, expiresAt, accountId]
     );
 
     res.redirect('/dashboard?meta=connected');
@@ -90,12 +125,13 @@ router.get('/callback', requireAuth, async (req, res) => {
     console.error('Meta OAuth callback error:', err.response?.data || err.message);
     res.redirect('/dashboard?meta=error');
   }
-});
+}
 
 router.post('/disconnect', requireAuth, async (req, res) => {
+  const platform = req.query.app === '2' ? 'meta_2' : 'meta';
   await db.query(
     'DELETE FROM credentials WHERE promoter_id = $1 AND platform = $2',
-    [req.session.promoterId, 'meta']
+    [req.session.promoterId, platform]
   );
   res.redirect('/dashboard');
 });
