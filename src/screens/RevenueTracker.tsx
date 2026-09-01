@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
   DollarSign, TrendingUp, TrendingDown, Target,
-  CheckCircle, Clock, AlertTriangle, BarChart2,
-  Users, Award, ChevronUp, ChevronDown,
+  CheckCircle, Clock, BarChart2,
+  Users, Award,
 } from 'lucide-react';
 import { storage } from '../lib/storage';
 import { useToast } from '../hooks/useToast';
@@ -14,11 +14,6 @@ const FINANCIAL_GOALS = [
   { label: '$10,000 MRR', target: 10000, unit: '$', month: 6 },
   { label: '$25,000 MRR', target: 25000, unit: '$', month: 12 },
 ];
-
-function formatCurrency(n: number): string {
-  if (n >= 1000) return `$${(n / 1000).toFixed(1)}k`;
-  return `$${n.toLocaleString()}`;
-}
 
 function PaymentBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
@@ -195,7 +190,7 @@ export default function RevenueTracker() {
             <h3 className="font-black text-[#1A1A2E]">Package Mix</h3>
           </div>
           <div className="space-y-3">
-            {packageDistribution.map(({ tier, count, value }) => (
+            {packageDistribution.map(({ tier, count }) => (
               <div key={tier} className="flex items-center gap-3">
                 <div className="text-xs text-gray-500 w-16 capitalize">{tier}</div>
                 <div className="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">

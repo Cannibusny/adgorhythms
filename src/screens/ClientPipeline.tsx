@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  Plus, X, Copy, ChevronRight, Phone, Mail, Globe,
+  Plus, X, Copy, Phone, Mail, Globe,
   Clock, ArrowRight, Users, Megaphone,
 } from 'lucide-react';
 import { storage, generateId } from '../lib/storage';

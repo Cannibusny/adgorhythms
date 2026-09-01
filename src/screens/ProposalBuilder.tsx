@@ -4,6 +4,7 @@ import {
   Loader2, ChevronDown, AlertCircle,
 } from 'lucide-react';
 import { storage, generateId } from '../lib/storage';
+import { claudeGenerate } from '../lib/claude';
 import { useToast } from '../hooks/useToast';
 import { PACKAGES } from '../data/sampleData';
 import type { Client, PackageTier, PackageConfig } from '../types';
@@ -11,7 +12,6 @@ import type { Client, PackageTier, PackageConfig } from '../types';
 async function generateProposal(
   client: Client,
   pkg: PackageConfig,
-  apiKey: string
 ): Promise<string> {
   const prompt = `You are writing a professional marketing proposal for ADgorhythms, an AI-powered marketing agency owned by Sheridan Williams in Hudson Valley, New York.
 
@@ -37,27 +37,7 @@ Make them feel like this is the obvious choice.
 
 Return the complete proposal text formatted with clear sections. Use plain text, no markdown asterisks.`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error((err as { error?: { message?: string } }).error?.message || 'API request failed');
-  }
-
-  const data = await response.json() as { content: Array<{ text: string }> };
-  return data.content[0]?.text ?? '';
+  return claudeGenerate([{ role: 'user', content: prompt }], 2000);
 }
 
 function PackageCard({
@@ -136,23 +116,17 @@ export default function ProposalBuilder() {
 
   const selectedClient = clients.find((c) => c.id === selectedClientId);
   const selectedPackage = PACKAGES.find((p) => p.id === selectedTier)!;
-  const agency = storage.getAgency();
 
   const handleGenerate = async () => {
     if (!selectedClient) {
       addToast('Please select a client first', 'warning');
       return;
     }
-    const apiKey = agency?.apiKey;
-    if (!apiKey) {
-      addToast('Add your Claude API key in Settings first', 'error');
-      return;
-    }
     setLoading(true);
     setError('');
     setProposal('');
     try {
-      const text = await generateProposal(selectedClient, selectedPackage, apiKey);
+      const text = await generateProposal(selectedClient, selectedPackage);
       setProposal(text);
       addToast('Proposal generated!', 'success');
     } catch (err) {
